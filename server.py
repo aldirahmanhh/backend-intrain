@@ -8,6 +8,14 @@ dotenv.load_dotenv()
 
 app = Flask(__name__)
 
+@app.route('/')
+def index():
+    return "Server is Online!"
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'ok'}), 200
+
 @app.route('/generate', methods=['POST'])
 def generate():
     data = request.get_json()
