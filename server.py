@@ -8,35 +8,12 @@ dotenv.load_dotenv()
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    return "Server is Online!"
+conversation_context = {}
 
-@app.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({'status': 'ok'}), 200
-
-@app.route('/generate', methods=['POST'])
-def generate():
-    data = request.get_json()
-    if not data or 'prompt' not in data:
-        return jsonify({'error': "No data found"}), 400
-
-    prompt_text = data['prompt']
-
+def generate_response(contents):
     client = genai.Client(
         api_key=os.environ.get("GEMINI_API_KEY"),
     )
-
-    model = "gemini-2.0-flash"
-    contents = [
-        types.Content(
-            role="user",
-            parts=[
-                types.Part.from_text(text=prompt_text),
-            ],
-        ),
-    ]
     
     generate_content_config = types.GenerateContentConfig(
         temperature=1,
@@ -49,15 +26,65 @@ def generate():
     generated_text = ""
     try:
         for chunk in client.models.generate_content_stream(
-            model=model,
+            model="gemini-2.0-flash",
             contents=contents,
             config=generate_content_config,
         ):
             generated_text += chunk.text
     except Exception as e:
+        raise Exception(f"Error calling Gemini API: {str(e)}")
+    
+    return generated_text
+
+@app.route('/')
+def index():
+    return "Server is Online!"
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'ok'}), 200
+
+@app.route('/chat', methods=['POST'])
+def chat():
+
+    data = request.get_json()
+    if not data or 'user_id' not in data or 'message' not in data:
+        return jsonify({'error': 'Parameter user_id dan message wajib disediakan.'}), 400
+
+    user_id = data['user_id']
+    user_message = data['message']
+
+    if user_id not in conversation_context:
+        conversation_context[user_id] = []
+
+    # Tambahkan pesan baru dari user ke dalam riwayat
+    conversation_context[user_id].append({
+        "role": "user",
+        "content": user_message
+    })
+
+    contents = []
+    for msg in conversation_context[user_id]:
+        content = types.Content(
+            role=msg["role"],
+            parts=[types.Part.from_text(text=msg["content"])]
+        )
+        contents.append(content)
+
+    try:
+        reply_text = generate_response(contents)
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    return jsonify({'response': generated_text}), 200
+    conversation_context[user_id].append({
+        "role": "assistant",
+        "content": reply_text
+    })
+
+    return jsonify({
+        'response': reply_text,
+        'context': conversation_context[user_id]
+    }), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
