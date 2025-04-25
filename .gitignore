@@ -1,5 +1,13 @@
+# Ignore Python bytecode files
 __pycache__/
 
 .env/
 .venv/
 .env
+
+# Uploaded files
+uploads/
+.jpg
+.png
+.jpeg
+.pdf
