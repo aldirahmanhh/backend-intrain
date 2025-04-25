@@ -2,15 +2,13 @@ import uuid
 import os
 import dotenv
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
 
-from google import genai
-from google.genai import types
 from core.generate import generate_response
+from core.cv_analyzer import save_submission_file, generate_cv_json
 
 dotenv.load_dotenv()
-
 
 app = Flask(__name__)
 
@@ -128,37 +126,19 @@ def build_system_prompt(hr_level, job_type):
         return (
             f"You are an HR interviewer conducting a relaxed, entry-level interview for the position of {job_type}. "
                 "Your goal is to help the candidate feel comfortable and highlight their basic skills and personality. "
-                "Ask 3 to 5 (one by one wait until the candidate answers the questions given tough questions) straightforward, friendly questions such as:\n"
-                "1. “Can you tell me a little about yourself and why you’re interested in this role?”\n"
-                "2. “What relevant experience or coursework do you have?”\n"
-                "3. “How would you describe your strengths and areas for growth?”\n"
-                "4. “Can you share an example of when you worked successfully in a team?”\n"
-                "5. “What motivates you to perform well at work?”\n"
+                "Ask 3 to 5 (one by one, wait until the candidate answers the questions given tough questions)"
                 "Keep your tone warm, supportive, and encouraging throughout the conversation."
         )
     elif rank == 2:
         return (
             f"You are an HR interviewer for the position of {job_type}, conducting a standard professional interview. "
-                "Ask 5 to 7 (one by one wait until the candidate answers the questions given tough questions) balanced questions that probe both behavioral and technical competencies, for example:\n"
-                "1. “Describe a challenging project you managed and how you overcame obstacles.”\n"
-                "2. “How do you prioritize tasks when you have multiple deadlines?”\n"
-                "3. “Tell me about a time you had to give constructive feedback to a colleague.”\n"
-                "4. “What tools or methods do you use to ensure quality in your work?”\n"
-                "5. “How do you stay current with developments in your field?”\n"
-                "6. “Can you walk me through a specific achievement you’re proud of?”\n"
+                "Ask 5 to 7 (one by one wait, until the candidate answers the questions given tough questions) balanced questions that probe both behavioral and technical competencies"
                 "Maintain a respectful, neutral tone—professional but not intimidating."
         )
     else:
         return (
             f"You are an HR interviewer for the position of {job_type}. Assume a subtly sarcastic and challenging demeanor to create a tense atmosphere. "
-                "Your aim is to test the candidate’s composure under pressure and make them work hard to impress you. Ask 7 to 10 (one by one wait until the candidate answers the questions given tough questions) such as:\n"
-                "1. “So, what makes you think you’re even remotely qualified for this role?”\n"
-                "2. “Explain a time you failed spectacularly—if you can call it failure.”\n"
-                "3. “Why should we choose you over ten other candidates who might actually know what they’re doing?”\n"
-                "4. “Walk me through a complex problem you solved. Don’t gloss over the details—make me work for it.”\n"
-                "5. “What’s your biggest weakness? And no, ‘overly dedicated’ doesn’t count.”\n"
-                "6. “How do you handle feedback—if you can handle it?”\n"
-                "7. “Sell me on one skill you claim to have, but I’m skeptical about it.”\n"
+                "Your aim is to test the candidate’s composure under pressure and make them work hard to impress you. Ask 7 to 10 (one by one, wait until the candidate answers the questions given tough questions)"
                 "Use ironic remarks and maintain a controlled, critical tone to keep the candidate on edge throughout the interview."
         )
 
@@ -248,6 +228,114 @@ def chat():
         db.session.commit()
 
     return jsonify({'session_id': session.id, 'response': reply}), 200
+
+# CV
+@app.route('/api/v1/feature/cv/upload', methods=['POST'])
+def upload_cv():
+    file    = request.files.get('file')
+    user_id = request.form.get('user_id')
+    if not user_id or not file:
+        return jsonify({'error': 'user_id and file are required.'}), 400
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found.'}), 404
+
+    # 1) Save the uploaded file and create CVSubmission
+    try:
+        submission = save_submission_file(file, user_id)
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
+
+    # 2) Run the AI screener, get back a dict with ats_passed, overall_feedback, sections[]
+    try:
+        screening = generate_cv_json(submission)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    # 3) Persist CVReview
+    review = CVReview(
+        id=str(uuid.uuid4()),
+        submission_id=submission.id,
+        ats_passed=screening['ats_passed'],
+        overall_feedback=screening['overall_feedback']
+    )
+    db.session.add(review)
+    db.session.commit()
+
+    # 4) Persist each CVReviewSection
+    section_objs = []
+    for sec in screening.get('sections', []):
+        obj = CVReviewSection(
+            id=str(uuid.uuid4()),
+            review_id=review.id,
+            section=sec['section'],
+            needs_improvement=sec['needs_improvement'],
+            feedback=sec['feedback']
+        )
+        db.session.add(obj)
+        section_objs.append(obj)
+    db.session.commit()
+
+    # 5) Return everything as JSON
+    return jsonify({
+        'submission': submission.to_dict(),
+        'review':     review.to_dict(),
+        'sections':   [o.to_dict() for o in section_objs]
+    }), 200
+
+@app.route('/api/v1/feature/cv/history/user/<user_id>/reviews', methods=['GET'])
+def user_cv_reviews(user_id):
+    # 1) Verify the user exists
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found.'}), 404
+
+    # 2) Load all submissions for this user, newest first
+    submissions = (CVSubmission.query
+                   .filter_by(user_id=user_id)
+                   .order_by(CVSubmission.uploaded_at.desc())
+                   .all())
+
+    history = []
+    for sub in submissions:
+        # 3) Find the review (if any)
+        review = CVReview.query.filter_by(submission_id=sub.id).first()
+        if not review:
+            # no review yet—skip or include empty placeholder
+            history.append({
+                'submission': sub.to_dict(),
+                'review':     None,
+                'sections':   []
+            })
+            continue
+
+        # 4) Load all section feedback for that review
+        sections = (CVReviewSection.query
+                    .filter_by(review_id=review.id)
+                    .all())
+
+        history.append({
+            'submission': sub.to_dict(),
+            'review':     review.to_dict(),
+            'sections':   [s.to_dict() for s in sections]
+        })
+
+    return jsonify(history), 200
+
+@app.route('/api/v1/feature/cv/history/<submission_id>', methods=['GET'])
+def cv_history(submission_id):
+    from core.models import CVSubmission
+    sub = CVSubmission.query.get(submission_id)
+    if not sub:
+        return jsonify(error='Submission not found'), 404
+    return jsonify(submission=sub.to_dict()), 200
+
+@app.route('/api/v1/feature/cv/history/user/<user_id>', methods=['GET'])
+def cv_history_user(user_id):
+    from core.models import CVSubmission
+    subs = CVSubmission.query.filter_by(user_id=user_id).all()
+    return jsonify([s.to_dict() for s in subs]), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
