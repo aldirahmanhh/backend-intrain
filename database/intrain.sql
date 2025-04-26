@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 23, 2025 at 06:11 PM
+-- Generation Time: Apr 26, 2025 at 09:03 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `chat_messages` (
-  `id` bigint(20) NOT NULL,
+  `id` char(36) NOT NULL,
   `session_id` char(36) NOT NULL,
   `sender` enum('user','bot') NOT NULL,
   `message` text NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE `cv_reviews` (
 --
 
 CREATE TABLE `cv_review_sections` (
-  `id` bigint(20) NOT NULL,
+  `id` char(36) NOT NULL,
   `review_id` char(36) NOT NULL,
   `section` enum('profile_summary','education','experience','skills','certification','portfolio') NOT NULL,
   `needs_improvement` tinyint(1) NOT NULL,
@@ -119,6 +119,15 @@ CREATE TABLE `hr_levels` (
   `difficulty_rank` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `hr_levels`
+--
+
+INSERT INTO `hr_levels` (`id`, `name`, `description`, `difficulty_rank`) VALUES
+(1, 'Easy', 'A beginner friendly', 1),
+(2, 'Normal', 'Need a bit of experiences', 2),
+(3, 'Hard', 'Highly experienced HR', 3);
+
 -- --------------------------------------------------------
 
 --
@@ -149,13 +158,6 @@ CREATE TABLE `users` (
   `email` varchar(100) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `username`, `password`, `name`, `email`, `created_at`) VALUES
-('3b24461a-87b6-4ea4-9771-cb9c751aaa6e', 'alice', 'newsecret', 'Alice Doe', 'alice.doe@example.com', '2025-04-23 09:29:34');
 
 --
 -- Indexes for dumped tables
@@ -228,22 +230,10 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `chat_messages`
---
-ALTER TABLE `chat_messages`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `cv_review_sections`
---
-ALTER TABLE `cv_review_sections`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `hr_levels`
 --
 ALTER TABLE `hr_levels`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
