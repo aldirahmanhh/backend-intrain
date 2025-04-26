@@ -295,17 +295,80 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 
 ---
 
+
 - Method: ```POST```
 
+- URL
+```bash
+{base}/api/v1/feature/cv/upload
+```
+
+- Response:
+```json
+{
+    "review": {
+        "ats_passed": true,
+        "id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+        "overall_feedback": "The CV is well-structured and contains relevant information. It showcases a strong academic background and practical experience in software engineering, machine learning, and cloud computing. The use of keywords is good, and the descriptions of experiences and projects are detailed enough to be understood by an ATS. However, some sections can be improved for clarity and impact, especially the profile summary and the formatting across different sections.",
+        "reviewed_at": "2025-04-26T17:14:39",
+        "submission_id": "d351bde3-daec-41ee-8481-c75675be6be4"
+    },
+    "sections": [
+        {
+            "feedback": "The profile summary is a good start, but can be improved by quantifying achievements and being more specific about your contributions and the impact you've made. Highlight your key skills and tailor it to the specific job description you are applying for.",
+            "id": "9dc1ef17-e068-43b3-92bd-448f4dd3f54c",
+            "needs_improvement": true,
+            "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+            "section": "profile_summary"
+        },
+        {
+            "feedback": "The education section is well-formatted and includes relevant coursework. The GPA is also a plus. Consider adding specific projects done during these courses if they are directly related to the jobs you're applying to.",
+            "id": "fa7f14f2-b186-445d-b849-01c4286976f3",
+            "needs_improvement": false,
+            "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+            "section": "education"
+        },
+        {
+            "feedback": "The experience section is detailed and provides a good overview of your responsibilities and accomplishments. Use action verbs to start each bullet point. Quantify accomplishments whenever possible (e.g., \"Reduced server costs by X%...\").",
+            "id": "693d57b8-9122-448d-bacd-1978e3a00c7b",
+            "needs_improvement": false,
+            "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+            "section": "experience"
+        },
+        {
+            "feedback": "The skills section is comprehensive and covers a wide range of relevant technologies. Consider categorizing the skills (e.g., \"Front-end\", \"Back-end\", \"Cloud\", \"Data Science\") for better readability. Ensure the listed skills align with the job description.",
+            "id": "225a21c3-adc3-4da0-88ac-130b907ef40f",
+            "needs_improvement": false,
+            "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+            "section": "skills"
+        },
+        {
+            "feedback": "The certification section is well-formatted and includes the expiration dates, which is great. Keep them updated.",
+            "id": "0d7954fa-a5a5-4924-a8c2-73c4fd627d6e",
+            "needs_improvement": false,
+            "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+            "section": "certification"
+        },
+        {
+            "feedback": "The portfolio section is clear. Ensure the GitHub link is working and showcases your best projects. Consider adding a brief description of each project on your GitHub profile.",
+            "id": "67d7b526-0648-4b26-9132-d8773fadf791",
+            "needs_improvement": false,
+            "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+            "section": "portfolio"
+        }
+    ],
+    "submission": {
+        "file_name": "my_cv.pdf",
+        "file_type": "pdf",
+        "file_url": "uploads\\5c3b3e3d-d116-4373-8a71-865ca19f409e.pdf",
+        "id": "d351bde3-daec-41ee-8481-c75675be6be4",
+        "uploaded_at": "2025-04-26T17:14:34",
+        "user_id": "7faca6b6-8604-4d28-9d07-2ade7d70b4ae"
+    }
+}
+```
 
 ---
-
-#### Get One CV Submission History
-
----
-
-- Method: ```GET```
-
 
 #### Get One CV Submission History API
 
@@ -313,14 +376,144 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 
 - Method: ```GET```
 
-#### List CV History
+- URL
+```bash
+{base}/api/v1/feature/cv/history/<submission_id>
+```
+
+- Request URL
+```bash
+{base}/api/v1/feature/cv/history/d351bde3-daec-41ee-8481-c75675be6be4
+```
+
+- Response:
+```json
+{
+    "submission": {
+        "file_name": "my_cv.pdf",
+        "file_type": "pdf",
+        "file_url": "uploads\\5c3b3e3d-d116-4373-8a71-865ca19f409e.pdf",
+        "id": "d351bde3-daec-41ee-8481-c75675be6be4",
+        "uploaded_at": "2025-04-26T17:14:34",
+        "user_id": "7faca6b6-8604-4d28-9d07-2ade7d70b4ae"
+    }
+}
+```
+
+#### List CV Reviews History API
 
 ---
 
 - Method: ```GET```
 
+- URL
+```bash
+{base}/api/v1/feature/cv/history/user/<user_id>/reviews
+```
 
+- Request URL
+```bash
+{base}/api/v1/feature/cv/history/user/7faca6b6-8604-4d28-9d07-2ade7d70b4ae/reviews
+```
 
+- Response:
+```json
+[
+    {
+        "review": {
+            "ats_passed": true,
+            "id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+            "overall_feedback": "The CV is well-structured and contains relevant information. It showcases a strong academic background and practical experience in software engineering, machine learning, and cloud computing. The use of keywords is good, and the descriptions of experiences and projects are detailed enough to be understood by an ATS. However, some sections can be improved for clarity and impact, especially the profile summary and the formatting across different sections.",
+            "reviewed_at": "2025-04-26T17:14:39",
+            "submission_id": "d351bde3-daec-41ee-8481-c75675be6be4"
+        },
+        "sections": [
+            {
+                "feedback": "The certification section is well-formatted and includes the expiration dates, which is great. Keep them updated.",
+                "id": "0d7954fa-a5a5-4924-a8c2-73c4fd627d6e",
+                "needs_improvement": false,
+                "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+                "section": "certification"
+            },
+            {
+                "feedback": "The skills section is comprehensive and covers a wide range of relevant technologies. Consider categorizing the skills (e.g., \"Front-end\", \"Back-end\", \"Cloud\", \"Data Science\") for better readability. Ensure the listed skills align with the job description.",
+                "id": "225a21c3-adc3-4da0-88ac-130b907ef40f",
+                "needs_improvement": false,
+                "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+                "section": "skills"
+            },
+            {
+                "feedback": "The portfolio section is clear. Ensure the GitHub link is working and showcases your best projects. Consider adding a brief description of each project on your GitHub profile.",
+                "id": "67d7b526-0648-4b26-9132-d8773fadf791",
+                "needs_improvement": false,
+                "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+                "section": "portfolio"
+            },
+            {
+                "feedback": "The experience section is detailed and provides a good overview of your responsibilities and accomplishments. Use action verbs to start each bullet point. Quantify accomplishments whenever possible (e.g., \"Reduced server costs by X%...\").",
+                "id": "693d57b8-9122-448d-bacd-1978e3a00c7b",
+                "needs_improvement": false,
+                "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+                "section": "experience"
+            },
+            {
+                "feedback": "The profile summary is a good start, but can be improved by quantifying achievements and being more specific about your contributions and the impact you've made. Highlight your key skills and tailor it to the specific job description you are applying for.",
+                "id": "9dc1ef17-e068-43b3-92bd-448f4dd3f54c",
+                "needs_improvement": true,
+                "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+                "section": "profile_summary"
+            },
+            {
+                "feedback": "The education section is well-formatted and includes relevant coursework. The GPA is also a plus. Consider adding specific projects done during these courses if they are directly related to the jobs you're applying to.",
+                "id": "fa7f14f2-b186-445d-b849-01c4286976f3",
+                "needs_improvement": false,
+                "review_id": "fef6782e-3e57-4aaa-a503-e8b60ea51300",
+                "section": "education"
+            }
+        ],
+        "submission": {
+            "file_name": "my_cv.pdf",
+            "file_type": "pdf",
+            "file_url": "uploads\\5c3b3e3d-d116-4373-8a71-865ca19f409e.pdf",
+            "id": "d351bde3-daec-41ee-8481-c75675be6be4",
+            "uploaded_at": "2025-04-26T17:14:34",
+            "user_id": "7faca6b6-8604-4d28-9d07-2ade7d70b4ae"
+        }
+    },
+    ...
+]
+```
+
+#### List Reviewed CV History API
+
+---
+
+- Method: ```GET```
+
+- URL
+```bash
+{base}/api/v1/feature/cv/history/user/<user_id>
+```
+
+- Request URL
+```bash
+{base}/api/v1/feature/cv/history/user/7faca6b6-8604-4d28-9d07-2ade7d70b4ae
+```
+
+- Response:
+```json
+[
+    {
+        "file_name": "my_cv.pdf",
+        "file_type": "pdf",
+        "file_url": "uploads\\5c3b3e3d-d116-4373-8a71-865ca19f409e.pdf",
+        "id": "d351bde3-daec-41ee-8481-c75675be6be4",
+        "uploaded_at": "2025-04-26T17:14:34",
+        "user_id": "7faca6b6-8604-4d28-9d07-2ade7d70b4ae"
+    },
+    ...
+]
+```
 
 #### User Enroll Course API
 
