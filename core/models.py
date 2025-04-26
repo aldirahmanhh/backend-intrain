@@ -35,22 +35,22 @@ class User(db.Model):
             email=self.email,
             created_at=self.created_at.isoformat()
         )
-
 class ChatSession(db.Model):
     __tablename__ = 'chat_sessions'
-    id            = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id       = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
-    hr_level_id   = db.Column(db.Integer, db.ForeignKey('hr_levels.id'), nullable=False)
-    started_at    = db.Column(db.DateTime, default=datetime.utcnow)
-
+    id              = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id         = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    hr_level_id     = db.Column(db.Integer, db.ForeignKey('hr_levels.id'), nullable=False)
+    job_type        = db.Column(db.String(200), nullable=False); total_questions = db.Column(db.Integer, nullable=False, default=0)
+    started_at      = db.Column(db.DateTime, default=datetime.utcnow)
     def to_dict(self):
         return dict(
             id=self.id,
             user_id=self.user_id,
             hr_level_id=self.hr_level_id,
+            job_type=self.job_type,
+            total_questions=self.total_questions,
             started_at=self.started_at.isoformat()
         )
-
 class ChatMessage(db.Model):
     __tablename__ = 'chat_messages'
     id          = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
