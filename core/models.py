@@ -144,6 +144,35 @@ class Course(db.Model):
             created_at=self.created_at.isoformat()
         )
 
+class CourseEnrollment(db.Model):
+    __tablename__ = 'course_enrollments'
+
+    id            = db.Column(db.String(36),
+                              primary_key=True,
+                              default=lambda: str(uuid.uuid4()))
+    user_id       = db.Column(db.String(36),
+                              db.ForeignKey('users.id'),
+                              nullable=False)
+    course_id     = db.Column(db.String(36),
+                              db.ForeignKey('courses.id'),
+                              nullable=False)
+    enrolled_at   = db.Column(db.DateTime,
+                              default=datetime.utcnow,
+                              nullable=False)
+    is_completed  = db.Column(db.Boolean,
+                              default=False,
+                              nullable=False)
+    completed_at  = db.Column(db.DateTime)
+
+    def to_dict(self):
+        return {
+            'id':             self.id,
+            'user_id':        self.user_id,
+            'course_id':      self.course_id,
+            'enrolled_at':    self.enrolled_at.isoformat(),
+            'is_completed':   self.is_completed,
+            'completed_at':   self.completed_at.isoformat() if self.completed_at else None
+        }
 class Job(db.Model):
     __tablename__ = 'jobs'
     id           = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -164,3 +193,4 @@ class Job(db.Model):
             requirements=self.requirements,
             posted_at=self.posted_at.isoformat()
         )
+    
