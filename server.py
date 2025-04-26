@@ -1,12 +1,20 @@
 import uuid
 import os
 import dotenv
+import re
+import json
+import random
 
 from flask import Flask, request, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
 
 from core.generate import generate_response
 from core.cv_analyzer import save_submission_file, generate_cv_json
+from core.course import get_course
+from core.course_enroll import (
+    enroll_course, unenroll_course,
+    complete_course, list_user_enrollments
+)
 
 dotenv.load_dotenv()
 
@@ -28,11 +36,6 @@ from core.models import (
     ChatSession, ChatMessage,
     CVSubmission, CVReview, CVReviewSection,
     CourseEnrollment, Course, Job
-)
-
-from core.course_enroll import (
-    enroll_course, unenroll_course,
-    complete_course, list_user_enrollments
 )
 
 # Create tables immediately to ensure schema is in place
@@ -103,7 +106,7 @@ def login():
     if not user:
         return jsonify({'error': 'Incorrect username or password.'}), 401
 
-    return jsonify({'message': 'Login successful.',}), 200
+    return jsonify({'message': 'Login successful.', 'user': serialize(user)}), 200
 
 @app.route('/api/v1/auth/user/update', methods=['PUT'])
 def update_user():
@@ -124,107 +127,158 @@ def update_user():
     return jsonify({'message': 'User data updated successfully.',}), 200
 
 # HR Chatbot API Endpoints
-def build_system_prompt(hr_level, job_type):
-    rank = hr_level.difficulty_rank
-    if rank == 1:
-        return (
-            f"You are an HR interviewer conducting a relaxed, entry-level interview for the position of {job_type}. "
-                "Your goal is to help the candidate feel comfortable and highlight their basic skills and personality. "
-                "Ask 3 to 5 (one by one, wait until the candidate answers the questions given tough questions)"
-                "Keep your tone warm, supportive, and encouraging throughout the conversation."
-        )
-    elif rank == 2:
-        return (
-            f"You are an HR interviewer for the position of {job_type}, conducting a standard professional interview. "
-                "Ask 5 to 7 (one by one wait, until the candidate answers the questions given tough questions) balanced questions that probe both behavioral and technical competencies"
-                "Maintain a respectful, neutral tone—professional but not intimidating."
-        )
-    else:
-        return (
-            f"You are an HR interviewer for the position of {job_type}. Assume a subtly sarcastic and challenging demeanor to create a tense atmosphere. "
-                "Your aim is to test the candidate’s composure under pressure and make them work hard to impress you. Ask 7 to 10 (one by one, wait until the candidate answers the questions given tough questions)"
-                "Use ironic remarks and maintain a controlled, critical tone to keep the candidate on edge throughout the interview."
-        )
+def strip_json(text):
+    """
+    Strip any ```json fences and extract the first JSON object.
+    """
+    text = re.sub(r'```(?:json)?', '', text)
+    m    = re.search(r'\{.*\}', text, flags=re.DOTALL)
+    return m.group(0).strip() if m else text
 
+def build_system_prompt(hr_level, job_type, asked_nums):
+    """
+    Instruct Gemini to output exactly one JSON question,
+    never repeating any in asked_nums.
+    """
+    tone_map = {
+        1: ("warm, supportive", (3, 5)),
+        2: ("neutral, professional", (5, 7)),
+        3: ("subtly sarcastic and challenging", (7, 10)),
+    }
+    tone, (low, high) = tone_map[hr_level.difficulty_rank]
+
+    prev = ""
+    if asked_nums:
+        prev = f"You have already asked questions numbered {asked_nums}. Do not repeat them. "
+
+    return (
+        f"You are an HR interviewer for the {job_type} position in a {tone} tone. "
+        f"Randomly select one new question from your pool of {low}–{high} job-related questions. {prev}\n\n"
+        "OUTPUT ONLY RAW JSON in this exact format (no markdown, no fences):\n"
+        "{\n"
+        '  "type": "question",\n'
+        '  "question_number": <integer>,\n'
+        '  "question_text": "…"\n'
+        "}\n"
+    )
+
+# Routes
 @app.route('/api/v1/hr_levels', methods=['GET'])
 def list_hr_levels():
     levels = HRLevel.query.order_by(HRLevel.difficulty_rank).all()
-    return jsonify([l.to_dict() for l in levels]), 200
+    return jsonify([l.__dict__ for l in levels]), 200
 
 @app.route('/api/v1/feature/interview/chat', methods=['POST'])
 def chat():
     data      = request.get_json() or {}
-    sid    = data.get('session_id')
-    uid    = data.get('user_id')
-    text   = data.get('message')
-    hrid   = data.get('hr_level_id')
-    job    = data.get('job_type')
-    evalf  = data.get('evaluate', False)
+    sid       = data.get('session_id')
+    user_text = data.get('message')
 
-    # 1) INITIAL CALL: start session + send “system” prompt as a user‐role dict
-    if not sid and not evalf:
-        # … validate uid/hrid/job/text …
-        session = ChatSession(id=str(uuid.uuid4()), user_id=uid, hr_level_id=hrid)
-        db.session.add(session); db.session.commit()
-        db.session.add(ChatMessage(session_id=session.id, sender='user', message=f"[Job: {job}] {text}"))
+    # 1) INITIAL CALL: no session_id → create session & ask intro
+    if not sid:
+        uid   = data['user_id']
+        hrid  = data['hr_level_id']
+        job   = data['job_type']
+
+        # decide how many real questions (excluding intro)
+        low, high = {1:(3,5), 2:(5,7), 3:(7,10)}[HRLevel.query.get(hrid).difficulty_rank]
+        n_real    = random.randint(low, high)
+
+        session = ChatSession(
+            user_id         = uid,
+            hr_level_id     = hrid,
+            job_type        = job,
+            total_questions = n_real + 1   # +1 for the intro question
+        )
+        db.session.add(session)
         db.session.commit()
 
-        lvl = HRLevel.query.get(hrid)
-        system_prompt = build_system_prompt(lvl, job)
+        # send intro as question #1
+        intro_q = {
+            "type": "question",
+            "question_number": 1,
+            "question_text": (
+                "Please introduce yourself: your name, current role, "
+                "and how many years of experience you have."
+            )
+        }
+        db.session.add(ChatMessage(
+            session_id=session.id,
+            sender='bot',
+            message=json.dumps(intro_q)
+        ))
+        db.session.commit()
 
-        messages = [
-            { "role": "user",  "content": system_prompt }
-        ]
+        return jsonify({"session_id": session.id, "response": intro_q}), 200
 
-    # 2) EVALUATION CALL: final assessment
-    elif evalf and sid:
-        session = ChatSession.query.get(sid)
-        history = ChatMessage.query.filter_by(session_id=sid).order_by(ChatMessage.sent_at).all()
+    # 2) CONTINUE CALL: save answer, then either ask next or evaluate
+    session = ChatSession.query.get(sid)
+    db.session.add(ChatMessage(
+        session_id=sid,
+        sender='user',
+        message=user_text
+    ))
+    db.session.commit()
 
-        eval_prompt = (
-          "Now that the interview is complete, review ALL candidate responses and reply exactly:\n\n"
-          "Skor: <1-10>\n"
-          "Rekomendasi:\n"
-          "- <item1>\n"
-          "- <item2>\n"
+    # reconstruct history & track asked questions
+    history = ChatMessage.query.filter_by(session_id=sid).order_by(ChatMessage.sent_at).all()
+    asked   = []
+    for msg in history:
+        if msg.sender == 'bot':
+            try:
+                blk = strip_json(msg.message)
+                q   = json.loads(blk)
+                if q.get("type") == "question":
+                    asked.append(q["question_number"])
+            except:
+                pass
+
+    # if done with all questions → evaluate
+    if len(asked) >= session.total_questions:
+        eval_p = (
+            "You are an expert HR evaluator. Now that the interview is complete, review ALL candidate responses "
+            "and OUTPUT ONLY RAW JSON in this exact format (no markdown, no fences):\n"
+            "{\n"
+            '  "score": <integer 1-10>,\n'
+            '  "recommendations": [\n'
+            '    "…",\n'
+            '    "…"\n'
+            '  ]\n'
+            "}\n"
         )
-        messages = [{ "role": "user", "content": eval_prompt }]
+        msgs = [{ "role": "system", "content": eval_p }]
         for m in history:
-            messages.append({
+            msgs.append({
                 "role": "user" if m.sender=="user" else "model",
                 "content": m.message
             })
+        out   = generate_response(msgs)
+        clean = strip_json(out)
+        eval_json = json.loads(clean)
+        return jsonify({"session_id": sid, "evaluation": eval_json}), 200
 
-        out = generate_response(messages)
-        return jsonify({"session_id": sid, "evaluation": out}), 200
-
-    # 3) CONTINUE INTERVIEW: save answer & get next question
-    else:
-        session = ChatSession.query.get(sid)
-        db.session.add(ChatMessage(session_id=sid, sender='user', message=text))
-        db.session.commit()
-        messages = []
-
-    # append FULL history for context in every non‐eval call
-    history = ChatMessage.query.filter_by(session_id=session.id).order_by(ChatMessage.sent_at).all()
+    # else → ask next question
+    lvl   = HRLevel.query.get(session.hr_level_id)
+    sys_p = build_system_prompt(lvl, session.job_type, asked)
+    msgs  = [{ "role": "system", "content": sys_p }]
     for m in history:
-        messages.append({
+        msgs.append({
             "role": "user" if m.sender=="user" else "model",
             "content": m.message
         })
 
-    # call Gemini
-    try:
-        reply = generate_response(messages)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    out   = generate_response(msgs)
+    clean = strip_json(out)
+    question = json.loads(clean)
 
-    # save the AI’s next question
-    if not evalf:
-        db.session.add(ChatMessage(session_id=session.id, sender='bot', message=reply))
-        db.session.commit()
+    db.session.add(ChatMessage(
+        session_id=sid,
+        sender='bot',
+        message=clean
+    ))
+    db.session.commit()
 
-    return jsonify({'session_id': session.id, 'response': reply}), 200
+    return jsonify({"session_id": sid, "response": question}), 200
 
 # CV
 @app.route('/api/v1/feature/cv/upload', methods=['POST'])
@@ -337,6 +391,21 @@ def cv_history_user(user_id):
 
 # Course Enrollment Endpoints
 
+@app.route('/api/v1/feature/courses', methods=['GET'])
+def api_list_courses():
+    courses = Course.query.order_by(Course.created_at.desc()).all()
+    return jsonify([c.to_dict() for c in courses]), 200
+
+@app.route('/api/v1/feature/courses/<string:course_id>', methods=['GET'])
+def api_get_course(course_id):
+    # look up the Course by its UUID
+    course = get_course(course_id)
+    if course is None:
+        return jsonify({'error': 'Course not found'}), 404
+
+    # return its serialized form
+    return jsonify(course.to_dict()), 200
+
 # 1) Enroll in a course
 @app.route('/api/v1/feature/courses/enroll', methods=['POST'])
 def api_enroll_course():
@@ -399,4 +468,5 @@ def api_list_user_courses(user_id):
 
 
 if __name__ == '__main__':
+
     app.run(debug=True)
