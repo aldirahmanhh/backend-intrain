@@ -27,7 +27,12 @@ from core.models import (
     User, HRLevel,
     ChatSession, ChatMessage,
     CVSubmission, CVReview, CVReviewSection,
-    Course, Job
+    CourseEnrollment, Course, Job
+)
+
+from core.course_enroll import (
+    enroll_course, unenroll_course,
+    complete_course, list_user_enrollments
 )
 
 # Create tables immediately to ensure schema is in place
@@ -84,7 +89,7 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({'message': 'Registration successful.', 'user': serialize(user)}), 201
+    return jsonify({'message': 'Registration successful.',}), 201
 
 @app.route('/api/v1/auth/user/login', methods=['POST'])
 def login():
@@ -98,7 +103,7 @@ def login():
     if not user:
         return jsonify({'error': 'Incorrect username or password.'}), 401
 
-    return jsonify({'message': 'Login successful.', 'user': serialize(user)}), 200
+    return jsonify({'message': 'Login successful.',}), 200
 
 @app.route('/api/v1/auth/user/update', methods=['PUT'])
 def update_user():
@@ -116,8 +121,7 @@ def update_user():
             setattr(user, field, data[field])
     db.session.commit()
 
-    return jsonify({'message': 'User data updated successfully.', 'user': serialize(user)}), 200
-
+    return jsonify({'message': 'User data updated successfully.',}), 200
 
 # HR Chatbot API Endpoints
 def build_system_prompt(hr_level, job_type):
@@ -329,6 +333,70 @@ def cv_history_user(user_id):
     from core.models import CVSubmission
     subs = CVSubmission.query.filter_by(user_id=user_id).all()
     return jsonify([s.to_dict() for s in subs]), 200
+
+
+# Course Enrollment Endpoints
+
+# 1) Enroll in a course
+@app.route('/api/v1/feature/courses/enroll', methods=['POST'])
+def api_enroll_course():
+    data      = request.get_json() or {}
+    user_id   = data.get('user_id')
+    course_id = data.get('course_id')
+    if not user_id or not course_id:
+        return jsonify({'error':'user_id & course_id required'}), 400
+
+    # validate user & course exist
+    if not User.query.get(user_id):
+        return jsonify({'error':'User not found'}), 404
+    if not Course.query.get(course_id):
+        return jsonify({'error':'Course not found'}), 404
+
+    enroll = enroll_course(user_id, course_id)
+    if enroll is None:
+        return jsonify({'message':'Already enrolled'}), 200
+
+    return jsonify(enroll.to_dict()), 201
+
+
+# 2) Unenroll from a course
+@app.route('/api/v1/feature/courses/unenroll', methods=['POST'])
+def api_unenroll_course():
+    data      = request.get_json() or {}
+    user_id   = data.get('user_id')
+    course_id = data.get('course_id')
+    if not user_id or not course_id:
+        return jsonify({'error':'user_id & course_id required'}), 400
+
+    if unenroll_course(user_id, course_id):
+        return jsonify({'message':'Unenrolled successfully'}), 200
+    return jsonify({'error':'Enrollment not found'}), 404
+
+
+# 3) Mark course as completed
+@app.route('/api/v1/feature/courses/complete', methods=['POST'])
+def api_complete_course():
+    data      = request.get_json() or {}
+    user_id   = data.get('user_id')
+    course_id = data.get('course_id')
+    if not user_id or not course_id:
+        return jsonify({'error':'user_id & course_id required'}), 400
+
+    updated = complete_course(user_id, course_id)
+    if not updated:
+        return jsonify({'error':'Enrollment not found'}), 404
+    return jsonify(updated.to_dict()), 200
+
+
+# 4) List a user's enrollments
+@app.route('/api/v1/feature/courses/user/<user_id>/enrollments', methods=['GET'])
+def api_list_user_courses(user_id):
+    if not User.query.get(user_id):
+        return jsonify({'error':'User not found'}), 404
+
+    enrolls = list_user_enrollments(user_id)
+    return jsonify([e.to_dict() for e in enrolls]), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
