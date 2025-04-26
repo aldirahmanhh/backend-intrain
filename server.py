@@ -18,6 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize SQLAlchemy
 from core.db import db
+
 # Bind db to this Flask app
 db.init_app(app)
 
@@ -29,7 +30,6 @@ from core.models import (
     Course, Job
 )
 
-
 # Create tables immediately to ensure schema is in place
 with app.app_context():
     db.create_all()
@@ -39,6 +39,7 @@ def serialize(obj):
     return obj.to_dict() if hasattr(obj, 'to_dict') else {}
 
 def map_role(sender):
+    # Gemini expects 'user' or 'model'
     return 'user' if sender == 'user' else 'model'
 
 # Retrieve or start a chat session for a user
@@ -51,7 +52,6 @@ def create_session(user_id, hr_level_id):
     db.session.add(session)
     db.session.commit()
     return session
-
 
 # Root Endpoint
 @app.route('/')
@@ -147,22 +147,15 @@ def list_hr_levels():
     levels = HRLevel.query.order_by(HRLevel.difficulty_rank).all()
     return jsonify([l.to_dict() for l in levels]), 200
 
-def map_role(sender):
-    # Gemini expects 'user' or 'model'
-    return 'user' if sender == 'user' else 'model'
-
-def build_system_prompt(hr_level, job_type):
-    rank = hr_level.difficulty_rank
-
 @app.route('/api/v1/feature/interview/chat', methods=['POST'])
 def chat():
-    d      = request.get_json() or {}
-    sid    = d.get('session_id')
-    uid    = d.get('user_id')
-    text   = d.get('message')
-    hrid   = d.get('hr_level_id')
-    job    = d.get('job_type')
-    evalf  = d.get('evaluate', False)
+    data      = request.get_json() or {}
+    sid    = data.get('session_id')
+    uid    = data.get('user_id')
+    text   = data.get('message')
+    hrid   = data.get('hr_level_id')
+    job    = data.get('job_type')
+    evalf  = data.get('evaluate', False)
 
     # 1) INITIAL CALL: start session + send “system” prompt as a user‐role dict
     if not sid and not evalf:
