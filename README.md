@@ -760,6 +760,13 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 }
 ```
 
+### Cloud Architecture
+
+<div align="center">
+  
+![GCP-inTrain ai Architecture](https://github.com/user-attachments/assets/e59a98a6-a10a-4050-8c8c-700433b049b1)
+
+</div>
 
 ### Deployment
 
