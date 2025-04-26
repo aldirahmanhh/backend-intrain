@@ -127,6 +127,41 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     "message": "User data updated successfully."
 }
 ```
+#### Get All HR Level API
+
+---
+
+- Method: ```GET```
+
+- URL
+```bash
+{base}/api/v1/feature/chat/hr_levels
+```
+
+- Response:
+```json
+[
+    {
+        "description": "A beginner friendly",
+        "difficulty_rank": 1,
+        "id": 1,
+        "name": "Easy"
+    },
+    {
+        "description": "Need a bit of experiences",
+        "difficulty_rank": 2,
+        "id": 2,
+        "name": "Normal"
+    },
+    {
+        "description": "Highly experienced HR",
+        "difficulty_rank": 3,
+        "id": 3,
+        "name": "Hard"
+    }
+]
+```
+
 
 #### Inintialize Chat with HR Bot API
 
