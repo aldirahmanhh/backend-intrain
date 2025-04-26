@@ -1,5 +1,6 @@
 # core/models.py
 import uuid
+import json
 from datetime import datetime
 from core.db import db
 
@@ -66,6 +67,23 @@ class ChatMessage(db.Model):
             sender=self.sender,
             message=self.message,
             sent_at=self.sent_at.isoformat()
+        )
+    
+class ChatEvaluation(db.Model):
+    __tablename__ = 'chat_evaluations'
+    id              = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id      = db.Column(db.String(36), db.ForeignKey('chat_sessions.id'), nullable=False)
+    score           = db.Column(db.SmallInteger, nullable=False)
+    recommendations = db.Column(db.Text, nullable=False)  # store JSON list as text
+    evaluated_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            session_id=self.session_id,
+            score=self.score,
+            recommendations=json.loads(self.recommendations),
+            evaluated_at=self.evaluated_at.isoformat()
         )
 
 class CVSubmission(db.Model):
