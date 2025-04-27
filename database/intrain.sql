@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 26, 2025 at 09:03 AM
+-- Generation Time: Apr 27, 2025 at 07:16 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -20,6 +20,20 @@ SET time_zone = "+00:00";
 --
 -- Database: `intrain`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chat_evaluations`
+--
+
+CREATE TABLE `chat_evaluations` (
+  `id` char(36) NOT NULL,
+  `session_id` char(36) NOT NULL,
+  `score` tinyint(4) NOT NULL,
+  `recommendations` text NOT NULL,
+  `evaluated_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -45,6 +59,8 @@ CREATE TABLE `chat_sessions` (
   `id` char(36) NOT NULL,
   `user_id` char(36) NOT NULL,
   `hr_level_id` int(11) NOT NULL,
+  `job_type` varchar(200) NOT NULL,
+  `total_questions` int(11) NOT NULL DEFAULT 0,
   `started_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -61,6 +77,21 @@ CREATE TABLE `courses` (
   `provider` varchar(100) DEFAULT NULL,
   `url` varchar(500) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `course_enrollments`
+--
+
+CREATE TABLE `course_enrollments` (
+  `id` char(36) NOT NULL,
+  `user_id` char(36) NOT NULL,
+  `course_id` char(36) NOT NULL,
+  `enrolled_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `is_completed` tinyint(1) NOT NULL DEFAULT 0,
+  `completed_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -124,9 +155,9 @@ CREATE TABLE `hr_levels` (
 --
 
 INSERT INTO `hr_levels` (`id`, `name`, `description`, `difficulty_rank`) VALUES
-(1, 'Easy', 'A beginner friendly', 1),
-(2, 'Normal', 'Need a bit of experiences', 2),
-(3, 'Hard', 'Highly experienced HR', 3);
+(1, 'Easy', 'A beginner friendly, very supportive and calming HR', 1),
+(2, 'Normal', 'Need a bit of professional experiences, a Tough one', 2),
+(3, 'Hard', 'Highly experienced HR and very sarcastic, a little hurtful', 3);
 
 -- --------------------------------------------------------
 
@@ -164,6 +195,13 @@ CREATE TABLE `users` (
 --
 
 --
+-- Indexes for table `chat_evaluations`
+--
+ALTER TABLE `chat_evaluations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `session_id` (`session_id`);
+
+--
 -- Indexes for table `chat_messages`
 --
 ALTER TABLE `chat_messages`
@@ -183,6 +221,15 @@ ALTER TABLE `chat_sessions`
 --
 ALTER TABLE `courses`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `course_enrollments`
+--
+ALTER TABLE `course_enrollments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ux_user_course` (`user_id`,`course_id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_course_id` (`course_id`);
 
 --
 -- Indexes for table `cv_reviews`
@@ -240,6 +287,12 @@ ALTER TABLE `hr_levels`
 --
 
 --
+-- Constraints for table `chat_evaluations`
+--
+ALTER TABLE `chat_evaluations`
+  ADD CONSTRAINT `chat_evaluations_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `chat_sessions` (`id`);
+
+--
 -- Constraints for table `chat_messages`
 --
 ALTER TABLE `chat_messages`
@@ -251,6 +304,13 @@ ALTER TABLE `chat_messages`
 ALTER TABLE `chat_sessions`
   ADD CONSTRAINT `chat_sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `chat_sessions_ibfk_2` FOREIGN KEY (`hr_level_id`) REFERENCES `hr_levels` (`id`);
+
+--
+-- Constraints for table `course_enrollments`
+--
+ALTER TABLE `course_enrollments`
+  ADD CONSTRAINT `fk_enroll_course` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`),
+  ADD CONSTRAINT `fk_enroll_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `cv_reviews`
