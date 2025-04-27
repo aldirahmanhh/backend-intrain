@@ -11,3 +11,6 @@ uploads/
 .png
 .jpeg
 .pdf
+
+# Ignore python file for additional scripting
+script.py
