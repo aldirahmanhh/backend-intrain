@@ -7,7 +7,7 @@
 
   <h1>inTrain.ai</h1>
 
-  <img src="https://github.com/user-attachments/assets/5c1c7ba8-0df1-4c37-86dc-85b5124297dc"/>
+  <img src="https://github.com/intrain-ai/.github/blob/main/assets/Banner%20-%20intrain.ai.png"/>
 </div>
 <br>
 <div align=center>
