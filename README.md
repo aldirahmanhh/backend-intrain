@@ -701,7 +701,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 {base}/api/v1/feature/courses
 ```
 
-- Response (Enrolled but Not Completed):
+- Response:
 ```json
 [
     {
@@ -748,7 +748,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 {base}/api/v1/feature/courses/00bb8aa2-5b26-4cd3-b061-8f7a20eb94dc
 ```
 
-- Response (Enrolled but Not Completed):
+- Response:
 ```json
 {
   "created_at": "2025-04-26T15:07:58",
@@ -907,7 +907,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     "start_year": 2020, (User Can Edit Freely)
     "user_id": "db604ac8-93cd-4d62-80a3-1f6900190bfa"
 }
-
+```
 - Response:
 ```json
 {
