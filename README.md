@@ -4,7 +4,10 @@
 </div>
 
 <div align=center>
+
   <h1>inTrain.ai</h1>
+
+  <img src="https://github.com/user-attachments/assets/5c1c7ba8-0df1-4c37-86dc-85b5124297dc"/>
 </div>
 <br>
 <div align=center>
@@ -330,8 +333,13 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 
 ---
 
-
 - Method: ```POST```
+
+<div align="center">
+  
+![Screenshot 2025-04-27 001608](https://github.com/user-attachments/assets/c7cb1535-a7d5-4e80-85ca-3875ba1827bd)
+
+</div>
 
 - URL
 ```bash
@@ -752,6 +760,13 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 }
 ```
 
+### Cloud Architecture
+
+<div align="center">
+  
+![GCP-inTrain ai Architecture](https://github.com/user-attachments/assets/e59a98a6-a10a-4050-8c8c-700433b049b1)
+
+</div>
 
 ### Deployment
 
