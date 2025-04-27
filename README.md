@@ -295,7 +295,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 
 - URL
 ```bash
-{base}/api/v1/feature/interview/chat/<session_id>>/history
+{base}/api/v1/feature/interview/chat/<session_id>/history
 ```
 
 - Request URL
@@ -759,6 +759,223 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
   "url": "https://example.com/c#-programming-fundamentals"
 }
 ```
+
+#### Create Profile Work Experience API
+
+---
+
+- Method: ```POST```
+
+- URL
+```bash
+{base}/api/v1/users/<string:user_id>/work_experiences
+```
+
+- Request URL
+```bash
+{base}/api/v1/users/db604ac8-93cd-4d62-80a3-1f6900190bfa/work_experiences
+```
+
+- Request Body:
+```json
+{
+    "job_title": "Senior Software Engineer",
+    "company_name": "ExampleCorp",
+    "job_desc": "Lead backend development and API design.",
+    "start_month": 1,
+    "start_year": 2020,
+    "end_month": 12,
+    "end_year": 2023,
+    "is_current": false
+}
+```
+
+- Response:
+```json
+{
+    "company_name": "ExampleCorp",
+    "created_at": "2025-04-27T06:34:12",
+    "end_month": 12,
+    "end_year": 2023,
+    "id": "af9a0a88-66ee-4e79-b8da-e86a2e6ebdd4",
+    "is_current": false,
+    "job_desc": "Lead backend development and API design.",
+    "job_title": "Senior Software Engineer",
+    "start_month": 1,
+    "start_year": 2020,
+    "user_id": "db604ac8-93cd-4d62-80a3-1f6900190bfa"
+}
+```
+
+#### Get All User Work Experience API
+
+---
+
+- Method: ```GET```
+
+- URL
+```bash
+{base}/api/v1/users/<string:user_id>/work_experiences
+```
+
+- Request URL
+```bash
+{base}/api/v1/users/db604ac8-93cd-4d62-80a3-1f6900190bfa/work_experiences
+```
+
+- Response:
+```json
+[
+    {
+        "company_name": "ExampleCorp",
+        "created_at": "2025-04-27T06:34:12",
+        "end_month": 12,
+        "end_year": 2023,
+        "id": "af9a0a88-66ee-4e79-b8da-e86a2e6ebdd4",
+        "is_current": false,
+        "job_desc": "Lead backend development and API design.",
+        "job_title": "Senior Software Engineer",
+        "start_month": 1,
+        "start_year": 2020,
+        "user_id": "db604ac8-93cd-4d62-80a3-1f6900190bfa"
+    },
+    ...
+]
+```
+
+#### Get Detail Experience API
+
+---
+
+- Method: ```GET```
+
+- URL
+```bash
+{base}/api/v1/users/<user_id>/work_experiences/<exp_id>
+```
+
+- Request URL
+```bash
+{base}/api/v1/users/db604ac8-93cd-4d62-80a3-1f6900190bfa/work_experiences/af9a0a88-66ee-4e79-b8da-e86a2e6ebdd4
+```
+
+- Response:
+```json
+{
+    "company_name": "ExampleCorp",
+    "created_at": "2025-04-27T06:34:12",
+    "end_month": 12,
+    "end_year": 2023,
+    "id": "af9a0a88-66ee-4e79-b8da-e86a2e6ebdd4",
+    "is_current": false,
+    "job_desc": "Lead backend development and API design.",
+    "job_title": "Senior Software Engineer",
+    "start_month": 1,
+    "start_year": 2020,
+    "user_id": "db604ac8-93cd-4d62-80a3-1f6900190bfa"
+}
+```
+
+#### Update Detail Experience API
+
+---
+
+- Method: ```PUT```
+
+- URL
+```bash
+{base}/api/v1/users/<user_id>/work_experiences/<exp_id>
+```
+
+- Request URL
+```bash
+{base}/api/v1/users/db604ac8-93cd-4d62-80a3-1f6900190bfa/work_experiences/af9a0a88-66ee-4e79-b8da-e86a2e6ebdd4
+```
+
+- Request Body:
+```json
+{
+    "company_name": "ExampleCorp", (User Can Edit Freely)
+    "created_at": "2025-04-27T06:34:12",
+    "end_month": 12, (User Can Edit Freely)
+    "end_year": 2023, (User Can Edit Freely)
+    "id": "af9a0a88-66ee-4e79-b8da-e86a2e6ebdd4",
+    "is_current": true, (User Can Edit Freely)
+    "job_desc": "Architect scalable microservices.", (User Can Edit Freely)
+    "job_title": "Senior Software Engineer", (User Can Edit Freely)
+    "start_month": 1, (User Can Edit Freely)
+    "start_year": 2020, (User Can Edit Freely)
+    "user_id": "db604ac8-93cd-4d62-80a3-1f6900190bfa"
+}
+
+- Response:
+```json
+{
+    "company_name": "ExampleCorp",
+    "created_at": "2025-04-27T06:34:12",
+    "end_month": 12,
+    "end_year": 2023,
+    "id": "af9a0a88-66ee-4e79-b8da-e86a2e6ebdd4",
+    "is_current": true,
+    "job_desc": "Architect scalable microservices.",
+    "job_title": "Senior Software Engineer",
+    "start_month": 1,
+    "start_year": 2020,
+    "user_id": "db604ac8-93cd-4d62-80a3-1f6900190bfa"
+}
+```
+#### Delete Work Experience API
+
+---
+
+- Method: ```DELETE```
+
+- URL
+```bash
+{base}/api/v1/users/<user_id>/work_experiences/<exp_id>
+```
+
+- Request URL
+```bash
+{base}/api/v1/users/db604ac8-93cd-4d62-80a3-1f6900190bfa/work_experiences/16a7dd27-fd0f-436a-9d5a-ea88a592b07c
+```
+
+#### Get All User Work Experience API
+
+---
+
+- Method: ```GET```
+
+- URL
+```bash
+{base}/api/v1/jobs
+```
+
+- Response:
+```json
+[
+    {
+        "company": "SecureSys",
+        "description": "Mobile Developer needed at SecureSys. You will be responsible for tasks related to mobile developer.",
+        "id": "be83448f-fece-409b-a2ab-0e923b8cbd55",
+        "location": "Yogyakarta, Indonesia",
+        "posted_at": "2025-04-27T03:09:37",
+        "requirements": "- Minimum 2 years experience as Mobile Developer\n- Good communication skills\n- Team player\n- Familiar with relevant tools and frameworks",
+        "title": "Mobile Developer"
+    },
+    {
+        "company": "GlobalSoft",
+        "description": "Quality Assurance Specialist needed at GlobalSoft. You will be responsible for tasks related to quality assurance specialist.",
+        "id": "8e797fc1-5578-4ff5-a9f2-8315951e435d",
+        "location": "Singapore",
+        "posted_at": "2025-04-24T16:19:37",
+        "requirements": "- Minimum 2 years experience as Quality Assurance Specialist\n- Good communication skills\n- Team player\n- Familiar with relevant tools and frameworks",
+        "title": "Quality Assurance Specialist"
+    },
+    ...
+]
+```
+
 
 ### Cloud Architecture
 
