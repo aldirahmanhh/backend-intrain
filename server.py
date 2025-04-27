@@ -5,10 +5,9 @@ import re
 import json
 import random
 
-from flask import Flask, request, jsonify, Response
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, jsonify
 
-from core.chat import map_role, create_session, strip_json, build_system_prompt
+from core.chat import strip_json, build_system_prompt
 from core.generate import generate_response
 from core.cv_analyzer import save_submission_file, generate_cv_json
 from core.course import get_course
@@ -120,12 +119,14 @@ def update_user():
 
 # -------------------- HR Chatbot API Endpoints --------------------
 
-# Routes
-@app.route('/api/v1/hr_levels', methods=['GET'])
+# List HR Levels
+@app.route('/api/v1/feature/chat/hr_levels', methods=['GET'])
 def list_hr_levels():
     levels = HRLevel.query.order_by(HRLevel.difficulty_rank).all()
-    return jsonify([l.__dict__ for l in levels]), 200
+    payload = [level.to_dict() for level in levels]
+    return jsonify(payload), 200
 
+# HR Chatbot API
 @app.route('/api/v1/feature/interview/chat', methods=['POST'])
 def chat():
     data      = request.get_json() or {}
@@ -169,7 +170,7 @@ def chat():
 
         return jsonify({"session_id": session.id, "response": intro_q}), 200
 
-    # 2) CONTINUE CALL: save answer, then either ask next or evaluate
+    # 2) Continue Chat: save answer, then either ask next or evaluate
     session = ChatSession.query.get(sid)
     db.session.add(ChatMessage(
         session_id=sid,
@@ -191,9 +192,9 @@ def chat():
             except:
                 pass
 
-    # if done with all questions → evaluate
+    # If done with all questions → evaluate
     if len(asked) >= session.total_questions:
-        # build the AI prompt
+        # Build the AI prompt
         eval_prompt = (
             "You are an expert HR evaluator. Now that the interview is complete, "
             "review ALL candidate responses and OUTPUT ONLY RAW JSON in this exact format "
@@ -207,7 +208,7 @@ def chat():
             "}\n"
         )
 
-        # assemble messages for Gemini
+        # Assemble messages for Gemini
         msgs = [{ "role": "system", "content": eval_prompt }]
         for m in history:
             msgs.append({
@@ -220,7 +221,7 @@ def chat():
         raw     = strip_json(ai_out)
         result  = json.loads(raw)
 
-        # --- SAVE to DB ---
+        # Save the evaluation
         rec = ChatEvaluation(
             session_id      = session.id,
             score           = result['score'],
@@ -229,13 +230,13 @@ def chat():
         db.session.add(rec)
         db.session.commit()
 
-        # return the saved evaluation
+        # Return the saved evaluation
         return jsonify({
             'session_id': session.id,
             'evaluation': rec.to_dict()
         }), 200
 
-    # else → ask next question
+    # Else: ask next question
     lvl   = HRLevel.query.get(session.hr_level_id)
     sys_p = build_system_prompt(lvl, session.job_type, asked)
     msgs  = [{ "role": "system", "content": sys_p }]
@@ -264,7 +265,7 @@ def list_user_chats(user_id):
     """
     Returns all chat sessions for a given user, ordered by most recent activity.
     """
-    # 1) fetch all sessions for this user
+    # Fetch all sessions for this user
     sessions = (
         ChatSession
         .query
@@ -275,7 +276,7 @@ def list_user_chats(user_id):
 
     chats = []
     for s in sessions:
-        # 2) get the latest message in the session
+        # Get the latest message in the session
         last_msg = (
             ChatMessage
             .query
@@ -288,7 +289,7 @@ def list_user_chats(user_id):
             content = last_msg.message
             if last_msg.sender == 'bot':
                 try:
-                    # strip any ``` fences and parse JSON
+                    # Strip any ``` fences and parse JSON
                     blob = json.loads(re.sub(r'```(?:json)?', '', content))
                     snippet = blob.get('question_text') or blob.get('answer_text') or content
                 except:
@@ -390,7 +391,7 @@ def upload_cv():
     }), 200
 
 
-# CV Review History
+# List CV Reviews History
 @app.route('/api/v1/feature/cv/history/user/<user_id>/reviews', methods=['GET'])
 def user_cv_reviews(user_id):
     # 1) Verify the user exists
@@ -430,7 +431,7 @@ def user_cv_reviews(user_id):
 
     return jsonify(history), 200
 
-# CV Review History by Submission ID
+# Get One CV Submission History
 @app.route('/api/v1/feature/cv/history/<submission_id>', methods=['GET'])
 def cv_history(submission_id):
     from core.models import CVSubmission
@@ -439,7 +440,7 @@ def cv_history(submission_id):
         return jsonify(error='Submission not found'), 404
     return jsonify(submission=sub.to_dict()), 200
 
-# CV Review History by User ID
+# List Reviewed CV History
 @app.route('/api/v1/feature/cv/history/user/<user_id>', methods=['GET'])
 def cv_history_user(user_id):
     from core.models import CVSubmission
@@ -449,13 +450,13 @@ def cv_history_user(user_id):
 
 # -------------------- Course Enrollment Endpoints --------------------
 
-# List all courses
+# List All Courses
 @app.route('/api/v1/feature/courses', methods=['GET'])
 def api_list_courses():
     courses = Course.query.order_by(Course.created_at.desc()).all()
     return jsonify([c.to_dict() for c in courses]), 200
 
-# Get a specific course by its UUID
+# Get a Specific Course
 @app.route('/api/v1/feature/courses/<string:course_id>', methods=['GET'])
 def api_get_course(course_id):
     # look up the Course by its UUID
@@ -466,7 +467,7 @@ def api_get_course(course_id):
     # return its serialized form
     return jsonify(course.to_dict()), 200
 
-# Enroll in a course
+# Enroll a Course
 @app.route('/api/v1/feature/courses/enroll', methods=['POST'])
 def api_enroll_course():
     data      = request.get_json() or {}
@@ -487,8 +488,7 @@ def api_enroll_course():
 
     return jsonify(enroll.to_dict()), 201
 
-
-# Unenroll from a course
+# Unenroll from a Course
 @app.route('/api/v1/feature/courses/unenroll', methods=['POST'])
 def api_unenroll_course():
     data      = request.get_json() or {}
@@ -502,7 +502,7 @@ def api_unenroll_course():
     return jsonify({'error':'Enrollment not found'}), 404
 
 
-# Mark course as completed
+# Mark Course as Completed
 @app.route('/api/v1/feature/courses/complete', methods=['POST'])
 def api_complete_course():
     data      = request.get_json() or {}
@@ -516,7 +516,7 @@ def api_complete_course():
         return jsonify({'error':'Enrollment not found'}), 404
     return jsonify(updated.to_dict()), 200
 
-# List a user's enrollments
+# List a User's Enrollments
 @app.route('/api/v1/feature/courses/user/<user_id>/enrollments', methods=['GET'])
 def api_list_user_courses(user_id):
     if not User.query.get(user_id):
@@ -525,7 +525,5 @@ def api_list_user_courses(user_id):
     enrolls = list_user_enrollments(user_id)
     return jsonify([e.to_dict() for e in enrolls]), 200
 
-
 if __name__ == '__main__':
-
     app.run(debug=True)
