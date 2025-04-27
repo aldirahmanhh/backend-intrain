@@ -22,7 +22,8 @@ dotenv.load_dotenv()
 app = Flask(__name__)
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize SQLAlchemy
@@ -36,7 +37,9 @@ from core.models import (
     User, HRLevel,
     ChatSession, ChatMessage, ChatEvaluation,
     CVSubmission, CVReview, CVReviewSection,
-    WorkExperience,
+    WorkExperience, 
+    Roadmap, RoadmapStep,
+    UserRoadmap, UserRoadmapProgress, Achievement,
     CourseEnrollment, Course, Job
 )
 
@@ -610,6 +613,160 @@ def delete_work_experience(user_id, exp_id):
 def list_jobs():
     jobs = Job.query.order_by(Job.posted_at.desc()).all()
     return jsonify([job.to_dict() for job in jobs])
+
+# ---- User-Facing Roadmap Endpoints ----
+
+# 1. List all available roadmaps
+@app.route('/api/v1/roadmaps', methods=['GET'])
+def list_roadmaps():
+    rms = Roadmap.query.order_by(Roadmap.job_type, Roadmap.title).all()
+    return jsonify([r.to_dict() for r in rms]), 200
+
+# 2. Get roadmap details and its steps
+@app.route('/api/v1/roadmaps/<string:roadmap_id>', methods=['GET'])
+def get_roadmap(roadmap_id):
+    rm = Roadmap.query.get(roadmap_id) or abort(404, 'Roadmap not found')
+    return jsonify(rm.to_dict()), 200
+
+# 3. User selects (starts) a roadmap
+@app.route('/api/v1/users/<string:user_id>/roadmaps/<string:roadmap_id>/start', methods=['POST'])
+def start_roadmap(user_id, roadmap_id):
+    User.query.get(user_id)  or abort(404, 'User not found')
+    Roadmap.query.get(roadmap_id) or abort(404, 'Roadmap not found')
+    existing = UserRoadmap.query.filter_by(user_id=user_id, roadmap_id=roadmap_id).first()
+    if existing:
+        return jsonify({'message': 'Already started'}), 200
+
+    ur = UserRoadmap(
+        id=str(uuid.uuid4()),
+        user_id=user_id,
+        roadmap_id=roadmap_id,
+        started_at=datetime.utcnow()
+    )
+    db.session.add(ur)
+    db.session.commit()
+    return jsonify(ur.to_dict()), 201
+
+# 4. List user-selected roadmaps
+@app.route('/api/v1/users/<string:user_id>/roadmaps', methods=['GET'])
+def user_list_roadmaps(user_id):
+    User.query.get(user_id) or abort(404, 'User not found')
+    sels = UserRoadmap.query.filter_by(user_id=user_id).all()
+    out = []
+    for ur in sels:
+        rm = Roadmap.query.get(ur.roadmap_id)
+        out.append({
+            **ur.to_dict(),
+            'roadmap': {
+                'id': rm.id,
+                'job_type': rm.job_type,
+                'title': rm.title,
+                'description': rm.description
+            }
+        })
+    return jsonify(out), 200
+
+# 5. User unselects (removes) a roadmap
+@app.route('/api/v1/users/<string:user_id>/roadmaps/<string:roadmap_id>', methods=['DELETE'])
+def delete_user_roadmap(user_id, roadmap_id):
+    ur = UserRoadmap.query.filter_by(user_id=user_id, roadmap_id=roadmap_id).first()
+    if not ur:
+        abort(404, 'Selection not found')
+
+    # remove all progress tied to this selection
+    UserRoadmapProgress.query.filter_by(user_roadmap_id=ur.id).delete(synchronize_session=False)
+    # remove any achievement
+    Achievement.query.filter_by(user_id=user_id, roadmap_id=roadmap_id).delete(synchronize_session=False)
+    db.session.delete(ur)
+    db.session.commit()
+    return '', 204
+
+# 6. User views progress
+@app.route('/api/v1/users/<string:user_id>/roadmaps/<string:roadmap_id>/progress', methods=['GET'])
+def user_progress(user_id, roadmap_id):
+    User.query.get(user_id) or abort(404, 'User not found')
+    Roadmap.query.get(roadmap_id) or abort(404, 'Roadmap not found')
+    ur = UserRoadmap.query.filter_by(user_id=user_id, roadmap_id=roadmap_id).first()
+    if not ur:
+        abort(400, 'Roadmap not started')
+
+    steps = RoadmapStep.query.filter_by(roadmap_id=roadmap_id)\
+                             .order_by(RoadmapStep.step_order).all()
+    result = []
+    for s in steps:
+        p = UserRoadmapProgress.query.filter_by(
+            user_roadmap_id=ur.id, step_id=s.id
+        ).first()
+        result.append({
+            **s.to_dict(),
+            'completed':    bool(p),
+            'completed_at': p.completed_at.isoformat() if p else None
+        })
+    return jsonify(result), 200
+
+# 7. User completes a step
+@app.route('/api/v1/users/<string:user_id>/roadmaps/<string:roadmap_id>/steps/<string:step_id>/complete', methods=['POST'])
+def complete_step(user_id, roadmap_id, step_id):
+    User.query.get(user_id)      or abort(404, 'User not found')
+    rm = Roadmap.query.get(roadmap_id) or abort(404, 'Roadmap not found')
+    step = RoadmapStep.query.get(step_id) or abort(404, 'Step not found')
+    if step.roadmap_id != roadmap_id:
+        abort(400, 'Step does not belong to this roadmap')
+
+    ur = UserRoadmap.query.filter_by(user_id=user_id, roadmap_id=roadmap_id).first()
+    if not ur:
+        abort(400, 'Roadmap not started')
+
+    exists = UserRoadmapProgress.query.filter_by(
+        user_roadmap_id=ur.id, step_id=step_id
+    ).first()
+    if exists:
+        return jsonify({'message': 'Step already completed'}), 200
+
+    prog = UserRoadmapProgress(
+        id=str(uuid.uuid4()),
+        user_roadmap_id=ur.id,
+        step_id=step_id,
+        completed_at=datetime.utcnow()
+    )
+    db.session.add(prog)
+    db.session.commit()
+
+    # award achievement if done
+    total = RoadmapStep.query.filter_by(roadmap_id=roadmap_id).count()
+    done  = UserRoadmapProgress.query.filter_by(user_roadmap_id=ur.id).count()
+    if done == total:
+        ach = Achievement.query.filter_by(user_id=user_id, roadmap_id=roadmap_id).first()
+        if not ach:
+            ach = Achievement(
+                id=str(uuid.uuid4()),
+                user_id=user_id,
+                roadmap_id=roadmap_id,
+                earned_at=datetime.utcnow()
+            )
+            db.session.add(ach)
+            db.session.commit()
+
+    return jsonify({'step_id': step_id, 'completed_at': prog.completed_at.isoformat()}), 200
+
+# 8. List user achievements
+@app.route('/api/v1/users/<string:user_id>/achievements', methods=['GET'])
+def list_achievements(user_id):
+    User.query.get(user_id) or abort(404, 'User not found')
+    achs = Achievement.query.filter_by(user_id=user_id).all()
+    out = []
+    for a in achs:
+        rm = Roadmap.query.get(a.roadmap_id)
+        out.append({
+            **a.to_dict(),
+            'roadmap': {
+                'id':          rm.id,
+                'job_type':    rm.job_type,
+                'title':       rm.title,
+                'description': rm.description
+            }
+        })
+    return jsonify(out), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

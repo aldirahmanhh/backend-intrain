@@ -240,3 +240,95 @@ class WorkExperience(db.Model):
             is_current=self.is_current,
             created_at=self.created_at.isoformat()
         )
+
+class Roadmap(db.Model):
+    __tablename__ = 'roadmaps'
+    id          = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    job_type    = db.Column(db.String(200), nullable=False)
+    title       = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+
+    steps = db.relationship(
+        'RoadmapStep',
+        backref='roadmap',
+        cascade='all, delete-orphan',
+        order_by='RoadmapStep.step_order'
+    )
+
+    def to_dict(self):
+        return {
+            'id':          self.id,
+            'job_type':    self.job_type,
+            'title':       self.title,
+            'description': self.description,
+            'steps':       [s.to_dict() for s in self.steps]
+        }
+
+class RoadmapStep(db.Model):
+    __tablename__ = 'roadmap_steps'
+    id          = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    roadmap_id  = db.Column(db.String(36), db.ForeignKey('roadmaps.id'), nullable=False)
+    step_order  = db.Column(db.Integer, nullable=False)
+    title       = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    course_id   = db.Column(db.String(36), db.ForeignKey('courses.id'))
+
+    def to_dict(self):
+        return {
+            'id':          self.id,
+            'step_order':  self.step_order,
+            'title':       self.title,
+            'description': self.description,
+            'course_id':   self.course_id
+        }
+
+class UserRoadmap(db.Model):
+    __tablename__ = 'user_roadmaps'
+    id          = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id     = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    roadmap_id  = db.Column(db.String(36), db.ForeignKey('roadmaps.id'), nullable=False)
+    started_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    progress = db.relationship(
+        'UserRoadmapProgress',
+        backref='user_roadmap',
+        cascade='all, delete-orphan'
+    )
+
+    def to_dict(self):
+        return {
+            'id':         self.id,
+            'user_id':    self.user_id,
+            'roadmap_id': self.roadmap_id,
+            'started_at': self.started_at.isoformat()
+        }
+
+class UserRoadmapProgress(db.Model):
+    __tablename__ = 'user_roadmap_progress'
+    id               = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_roadmap_id  = db.Column(db.String(36), db.ForeignKey('user_roadmaps.id'), nullable=False)
+    step_id          = db.Column(db.String(36), db.ForeignKey('roadmap_steps.id'), nullable=False)
+    completed_at     = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id':              self.id,
+            'user_roadmap_id': self.user_roadmap_id,
+            'step_id':         self.step_id,
+            'completed_at':    self.completed_at.isoformat()
+        }
+
+class Achievement(db.Model):
+    __tablename__ = 'achievements'
+    id          = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id     = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    roadmap_id  = db.Column(db.String(36), db.ForeignKey('roadmaps.id'), nullable=False)
+    earned_at   = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id':         self.id,
+            'user_id':    self.user_id,
+            'roadmap_id': self.roadmap_id,
+            'earned_at':  self.earned_at.isoformat()
+        }
