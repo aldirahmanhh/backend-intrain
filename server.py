@@ -5,7 +5,8 @@ import re
 import json
 import random
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
+from datetime import datetime
 
 from core.chat import strip_json, build_system_prompt
 from core.generate import generate_response
@@ -35,6 +36,7 @@ from core.models import (
     User, HRLevel,
     ChatSession, ChatMessage, ChatEvaluation,
     CVSubmission, CVReview, CVReviewSection,
+    WorkExperience,
     CourseEnrollment, Course, Job
 )
 
@@ -524,6 +526,90 @@ def api_list_user_courses(user_id):
 
     enrolls = list_user_enrollments(user_id)
     return jsonify([e.to_dict() for e in enrolls]), 200
+
+# ---------- Work Experience Endpoints ----------
+
+# List all work experiences for a user
+@app.route('/api/v1/users/<string:user_id>/work_experiences', methods=['GET'])
+def list_work_experiences(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        abort(404, description='User not found')
+    exps = (
+        WorkExperience
+        .query
+        .filter_by(user_id=user_id)
+        .order_by(WorkExperience.start_year.desc(), WorkExperience.start_month.desc())
+        .all()
+    )
+    return jsonify([exp.to_dict() for exp in exps])
+
+# Retrieve a single work experience
+@app.route('/api/v1/users/<string:user_id>/work_experiences/<string:exp_id>', methods=['GET'])
+def get_work_experience(user_id, exp_id):
+    exp = WorkExperience.query.filter_by(id=exp_id, user_id=user_id).first()
+    if not exp:
+        abort(404, description='Experience not found')
+    return jsonify(exp.to_dict())
+
+# Create a new work experience
+@app.route('/api/v1/users/<string:user_id>/work_experiences', methods=['POST'])
+def create_work_experience(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        abort(404, description='User not found')
+    data = request.get_json() or {}
+    required_fields = ['job_title', 'company_name', 'start_month', 'start_year']
+    for field in required_fields:
+        if field not in data:
+            abort(400, description=f"'{field}' is required")
+
+    exp = WorkExperience(
+        id=str(uuid.uuid4()),
+        user_id=user_id,
+        job_title=data['job_title'],
+        company_name=data['company_name'],
+        job_desc=data.get('job_desc'),
+        start_month=data['start_month'],
+        start_year=data['start_year'],
+        end_month=data.get('end_month'),
+        end_year=data.get('end_year'),
+        is_current=data.get('is_current', False),
+        created_at=datetime.utcnow()
+    )
+    db.session.add(exp)
+    db.session.commit()
+    return jsonify(exp.to_dict()), 201
+
+# Update an existing work experience
+@app.route('/api/v1/users/<string:user_id>/work_experiences/<string:exp_id>', methods=['PUT'])
+def update_work_experience(user_id, exp_id):
+    exp = WorkExperience.query.filter_by(id=exp_id, user_id=user_id).first()
+    if not exp:
+        abort(404, description='Experience not found')
+    data = request.get_json() or {}
+    updatable = ['job_title', 'company_name', 'job_desc', 'start_month', 'start_year', 'end_month', 'end_year', 'is_current']
+    for field in updatable:
+        if field in data:
+            setattr(exp, field, data[field])
+    db.session.commit()
+    return jsonify(exp.to_dict())
+
+# Delete a work experience
+@app.route('/api/v1/users/<string:user_id>/work_experiences/<string:exp_id>', methods=['DELETE'])
+def delete_work_experience(user_id, exp_id):
+    exp = WorkExperience.query.filter_by(id=exp_id, user_id=user_id).first()
+    if not exp:
+        abort(404, description='Experience not found')
+    db.session.delete(exp)
+    db.session.commit()
+    return jsonify({'message':'Experience deleted'}), 200
+
+# List all jobs
+@app.route('/api/v1/jobs', methods=['GET'])
+def list_jobs():
+    jobs = Job.query.order_by(Job.posted_at.desc()).all()
+    return jsonify([job.to_dict() for job in jobs])
 
 if __name__ == '__main__':
     app.run(debug=True)

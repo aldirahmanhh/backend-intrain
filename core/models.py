@@ -212,3 +212,31 @@ class Job(db.Model):
             posted_at=self.posted_at.isoformat()
         )
     
+class WorkExperience(db.Model):
+    __tablename__ = 'work_experiences'
+    id            = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id       = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    job_title     = db.Column(db.String(200), nullable=False)
+    company_name  = db.Column(db.String(200), nullable=False)
+    job_desc      = db.Column(db.Text)
+    start_month   = db.Column(db.SmallInteger, nullable=False)
+    start_year    = db.Column(db.SmallInteger, nullable=False)
+    end_month     = db.Column(db.SmallInteger)
+    end_year      = db.Column(db.SmallInteger)
+    is_current    = db.Column(db.Boolean, default=False, nullable=False)
+    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            user_id=self.user_id,
+            job_title=self.job_title,
+            company_name=self.company_name,
+            job_desc=self.job_desc,
+            start_month=self.start_month,
+            start_year=self.start_year,
+            end_month=self.end_month,
+            end_year=self.end_year,
+            is_current=self.is_current,
+            created_at=self.created_at.isoformat()
+        )
