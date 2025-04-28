@@ -1331,6 +1331,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     }
 ]
 ```
+
 - Response (If Step is Marked Complete by User):
 ```json
 [
@@ -1345,6 +1346,56 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     },
     ...
 ]
+```
+
+#### List User Achievements API
+
+---
+
+- Method: ```GET```
+
+- URL
+```bash
+{base}/api/v1/users/<user_id>/achievements
+```
+
+- Request URL
+```bash
+{base}/api/v1/users/db604ac8-93cd-4d62-80a3-1f6900190bfa/achievements
+```
+
+- Response:
+```json
+[
+    {
+        "earned_at": "2025-04-28T09:48:05",
+        "id": "08662eb6-7b2d-4152-9d13-069e4fc1c7af",
+        "roadmap": {
+            "description": "Your guide to mastering modern frontend development.",
+            "id": "ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3",
+            "job_type": "Frontend Developer",
+            "title": "Roadmap to Frontend Developer"
+        },
+        "roadmap_id": "ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3",
+        "user_id": "db604ac8-93cd-4d62-80a3-1f6900190bfa"
+    }
+]
+```
+
+### Delete Roadmap API
+
+---
+
+- Method: ```DELETE```
+
+- URL
+```bash
+{base}/api/v1/users/<user_id>/roadmaps/<roadmap_id>
+```
+
+- Request URL
+```bash
+{base}/api/v1/users/db604ac8-93cd-4d62-80a3-1f6900190bfa/roadmaps/ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3
 ```
 
 ### Cloud Architecture
