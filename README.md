@@ -39,7 +39,7 @@ structure for the development, maintenance, and documentation of inTrain.ai serv
 ---
 **Important Notes**
 
-The API endpoints currently documented with the placeholder ```{base}``` point to the local development server ```http://localhost:5000```. When the backend has been deployed, the mobile development team should update the domain to the production URL provided by the cloud computing and backend team.
+The API endpoints currently documented with the placeholder ```{base}``` point to the local development server ```http://localhost:5000```. When the backend has been deployed, the mobile development team should update the domain to the production URL provided by the cloud computing and backend team. Every data example shown here is dummy data for illustrative purposes. No real user or sensitive information is exposed, and all examples are safe from external access.
 
 #### Login API
 
