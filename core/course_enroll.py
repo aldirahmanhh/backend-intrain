@@ -6,19 +6,26 @@ from core.models import CourseEnrollment
 
 def enroll_course(user_id: str, course_id: str) -> CourseEnrollment:
     """
-    Enroll a user in a course. Returns the new enrollment,
-    or None if already enrolled.
+    Soft-enroll a user in a course. Returns the enrollment.
     """
-    existing = CourseEnrollment.query.filter_by(
+    enroll = CourseEnrollment.query.filter_by(
         user_id=user_id, course_id=course_id
     ).first()
-    if existing:
-        return None
 
+    if enroll:
+        # if it existed but was “unenrolled”, re-activate it
+        if not enroll.enrolled_status:
+            enroll.enrolled_status = True
+            enroll.enrolled_at     = datetime.utcnow()
+            db.session.commit()
+        return enroll
+
+    # first-time enroll
     enroll = CourseEnrollment(
         id=str(uuid.uuid4()),
         user_id=user_id,
-        course_id=course_id
+        course_id=course_id,
+        enrolled_status=True
     )
     db.session.add(enroll)
     db.session.commit()
@@ -26,14 +33,15 @@ def enroll_course(user_id: str, course_id: str) -> CourseEnrollment:
 
 def unenroll_course(user_id: str, course_id: str) -> bool:
     """
-    Unenroll a user from a course. Returns True if deleted.
+    Soft-unenroll a user. Returns True if record existed.
     """
     enroll = CourseEnrollment.query.filter_by(
         user_id=user_id, course_id=course_id
     ).first()
     if not enroll:
         return False
-    db.session.delete(enroll)
+
+    enroll.enrolled_status = False
     db.session.commit()
     return True
 
