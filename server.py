@@ -480,18 +480,15 @@ def api_enroll_course():
     course_id = data.get('course_id')
     if not user_id or not course_id:
         return jsonify({'error':'user_id & course_id required'}), 400
-
-    # validate user & course exist
     if not User.query.get(user_id):
         return jsonify({'error':'User not found'}), 404
     if not Course.query.get(course_id):
         return jsonify({'error':'Course not found'}), 404
 
     enroll = enroll_course(user_id, course_id)
-    if enroll is None:
-        return jsonify({'message':'Already enrolled'}), 200
-
-    return jsonify(enroll.to_dict()), 201
+    status = enroll.enrolled_status
+    code   = 201 if status and enroll.enrolled_at == enroll.enrolled_at else 200
+    return jsonify(enroll.to_dict()), code
 
 # Unenroll from a Course
 @app.route('/api/v1/feature/courses/unenroll', methods=['POST'])
@@ -502,9 +499,10 @@ def api_unenroll_course():
     if not user_id or not course_id:
         return jsonify({'error':'user_id & course_id required'}), 400
 
-    if unenroll_course(user_id, course_id):
-        return jsonify({'message':'Unenrolled successfully'}), 200
-    return jsonify({'error':'Enrollment not found'}), 404
+    success = unenroll_course(user_id, course_id)
+    if not success:
+        return jsonify({'error':'Enrollment not found','enrolled_status':False}), 404
+    return jsonify({'message':'Unenrolled successfully','enrolled_status':False}), 200
 
 
 # Mark Course as Completed
