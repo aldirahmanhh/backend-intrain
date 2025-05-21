@@ -171,8 +171,10 @@ class CourseEnrollment(db.Model):
     enrolled_at     = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     is_completed    = db.Column(db.Boolean, default=False, nullable=False)
     completed_at    = db.Column(db.DateTime)
-    # new flag:
     enrolled_status = db.Column(db.Boolean, default=False, nullable=False)
+
+    # <-- add this:
+    course = db.relationship('Course', backref='enrollments')
 
     def to_dict(self):
         return {
@@ -182,8 +184,11 @@ class CourseEnrollment(db.Model):
             'enrolled_at':      self.enrolled_at.isoformat(),
             'is_completed':     self.is_completed,
             'completed_at':     self.completed_at.isoformat() if self.completed_at else None,
-            'enrolled_status':  self.enrolled_status
+            'enrolled_status':  self.enrolled_status,
+            'course_title':     self.course.title,
+            'provider':         self.course.provider,
         }
+
     
 class Job(db.Model):
     __tablename__ = 'jobs'

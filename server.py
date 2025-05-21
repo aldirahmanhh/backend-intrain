@@ -486,9 +486,10 @@ def api_enroll_course():
         return jsonify({'error':'Course not found'}), 404
 
     enroll = enroll_course(user_id, course_id)
-    status = enroll.enrolled_status
-    code   = 201 if status and enroll.enrolled_at == enroll.enrolled_at else 200
-    return jsonify(enroll.to_dict()), code
+    payload = enroll.to_dict()
+    # use 201 when first-time, 200 on re-activate
+    status_code = 201 if enroll.enrolled_at == enroll.enrolled_at and enroll.enrolled_status and enroll.id else 200
+    return jsonify(payload), status_code
 
 # Unenroll from a Course
 @app.route('/api/v1/feature/courses/unenroll', methods=['POST'])
@@ -498,11 +499,20 @@ def api_unenroll_course():
     course_id = data.get('course_id')
     if not user_id or not course_id:
         return jsonify({'error':'user_id & course_id required'}), 400
+    if not CourseEnrollment.query.filter_by(user_id=user_id, course_id=course_id).first():
+        return jsonify({'error':'Enrollment not found'}), 404
 
     success = unenroll_course(user_id, course_id)
-    if not success:
-        return jsonify({'error':'Enrollment not found','enrolled_status':False}), 404
-    return jsonify({'message':'Unenrolled successfully','enrolled_status':False}), 200
+    # build a consistent payload
+    course   = Course.query.get(course_id)
+    payload  = {
+        'user_id':        user_id,
+        'course_id':      course_id,
+        'enrolled_status': False,
+        'course_title':   course.title,
+        'provider':       course.provider,
+    }
+    return jsonify(payload), 200
 
 
 # Mark Course as Completed
