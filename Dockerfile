@@ -31,6 +31,8 @@ ENV FLASK_APP=server.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_DEBUG=0
+ENV DATABASE_URL="sqlite:///instance/app.db"
+ENV GEMINI_API_KEY="AIzaSyD1axXzBXa1p398REp82dMQA0qadmIvafM"
 
 # Expose port
 EXPOSE 5000
