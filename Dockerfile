@@ -23,8 +23,10 @@ RUN pip install --no-cache-dir -r requirements.txt --verbose
 # Copy the rest of the application
 COPY . .
 
-# Create uploads directory
-RUN mkdir -p uploads
+# Create necessary directories and set permissions
+RUN mkdir -p uploads instance && \
+    chmod -R 777 instance && \
+    chmod -R 777 uploads
 
 # Set environment variables
 ENV FLASK_APP=server.py
