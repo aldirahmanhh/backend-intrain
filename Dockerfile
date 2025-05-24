@@ -7,13 +7,18 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip and install wheel
+RUN python -m pip install --upgrade pip && \
+    pip install wheel
+
+# Install Python dependencies with verbose output
+RUN pip install --no-cache-dir -r requirements.txt --verbose
 
 # Copy the rest of the application
 COPY . .
