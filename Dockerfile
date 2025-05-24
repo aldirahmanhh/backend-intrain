@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     python3-dev \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
@@ -23,17 +24,16 @@ RUN pip install --no-cache-dir -r requirements.txt --verbose
 # Copy the rest of the application
 COPY . .
 
-# Create necessary directories and set permissions
-RUN mkdir -p /app/instance /app/uploads && \
-    chown -R nobody:nogroup /app/instance /app/uploads && \
-    chmod -R 777 /app/instance /app/uploads
+# Create uploads directory
+RUN mkdir -p /app/uploads && \
+    chown -R nobody:nogroup /app/uploads && \
+    chmod -R 777 /app/uploads
 
 # Set environment variables
 ENV FLASK_APP=server.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_DEBUG=0
-ENV DATABASE_URL="sqlite:////app/instance/app.db"
 ENV GEMINI_API_KEY="AIzaSyD1axXzBXa1p398REp82dMQA0qadmIvafM"
 
 # Switch to non-root user
