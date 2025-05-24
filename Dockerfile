@@ -30,9 +30,10 @@ RUN mkdir -p uploads
 ENV FLASK_APP=server.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
+ENV FLASK_DEBUG=0
 
 # Expose port
 EXPOSE 5000
 
 # Command to run the application
-CMD ["python", "server.py"]
+CMD ["flask", "--app", "server.py", "run", "--host=0.0.0.0"]
