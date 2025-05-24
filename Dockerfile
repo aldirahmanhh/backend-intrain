@@ -24,17 +24,20 @@ RUN pip install --no-cache-dir -r requirements.txt --verbose
 COPY . .
 
 # Create necessary directories and set permissions
-RUN mkdir -p uploads instance && \
-    chmod -R 777 instance && \
-    chmod -R 777 uploads
+RUN mkdir -p /app/instance /app/uploads && \
+    chown -R nobody:nogroup /app/instance /app/uploads && \
+    chmod -R 777 /app/instance /app/uploads
 
 # Set environment variables
 ENV FLASK_APP=server.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_DEBUG=0
-ENV DATABASE_URL="sqlite:///instance/app.db"
+ENV DATABASE_URL="sqlite:////app/instance/app.db"
 ENV GEMINI_API_KEY="AIzaSyD1axXzBXa1p398REp82dMQA0qadmIvafM"
+
+# Switch to non-root user
+USER nobody
 
 # Expose port
 EXPOSE 5000
