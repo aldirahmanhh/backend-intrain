@@ -1,12 +1,12 @@
 import os
 import dotenv
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai import types
 
 dotenv.load_dotenv()
 
 # Initialize the GenAI client once
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate_response(contents):
     """
@@ -47,12 +47,12 @@ def generate_response(contents):
     # 3) Stream and accumulate the answer
     generated_text = ""
     try:
-        for chunk in client.models.generate_content_stream(
-            model="gemini-2.0-flash",
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(
             contents=prompt_texts,
-            config=config,
-        ):
-            generated_text += chunk.text
+            generation_config=config
+        )
+        generated_text = response.text
     except Exception as e:
         # Bubble up a clearer exception
         raise Exception(f"Error calling Gemini API: {e}")
