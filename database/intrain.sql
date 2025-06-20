@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 30, 2025 at 06:51 PM
+-- Generation Time: Jun 20, 2025 at 07:29 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -135,7 +135,8 @@ CREATE TABLE `course_enrollments` (
   `course_id` char(36) NOT NULL,
   `enrolled_at` datetime NOT NULL DEFAULT current_timestamp(),
   `is_completed` tinyint(1) NOT NULL DEFAULT 0,
-  `completed_at` datetime DEFAULT NULL
+  `completed_at` datetime DEFAULT NULL,
+  `enrolled_status` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -303,6 +304,63 @@ INSERT INTO `jobs` (`id`, `title`, `company`, `location`, `description`, `requir
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `mentorship_feedback`
+--
+
+CREATE TABLE `mentorship_feedback` (
+  `id` char(36) NOT NULL,
+  `session_id` char(36) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `feedback` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mentorship_sessions`
+--
+
+CREATE TABLE `mentorship_sessions` (
+  `id` char(36) NOT NULL,
+  `mentee_id` char(36) NOT NULL,
+  `mentor_id` char(36) NOT NULL,
+  `scheduled_at` datetime NOT NULL,
+  `meet_link` varchar(300) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `completed` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mentor_availabilities`
+--
+
+CREATE TABLE `mentor_availabilities` (
+  `id` char(36) NOT NULL,
+  `mentor_id` char(36) NOT NULL,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mentor_profiles`
+--
+
+CREATE TABLE `mentor_profiles` (
+  `id` char(36) NOT NULL,
+  `user_id` char(36) NOT NULL,
+  `expertise` varchar(200) NOT NULL,
+  `bio` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `roadmaps`
 --
 
@@ -384,15 +442,16 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `is_mentor` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `name`, `email`, `created_at`) VALUES
-('db604ac8-93cd-4d62-80a3-1f6900190bfa', 'admin', 'admin123', 'Admin', 'admin@intrain.ai', '2025-04-27 06:27:54');
+INSERT INTO `users` (`id`, `username`, `password`, `name`, `email`, `created_at`, `is_mentor`) VALUES
+('4c87d980-7457-4df1-ba12-c152b948b762', 'admin', 'scrypt:32768:8:1$WstwojMgummixFGV$de5f878e90cc64b1a9a35ea355ab94c63fa4226f35eae3227c1be829bf2daa17b0711d6cf72fb98d549f23b4ca7758850e2a51f5deaff65842f5d58cca0a6317', 'Administrator', 'admin@intrain.ai', '2025-06-20 14:06:04', 0);
 
 -- --------------------------------------------------------
 
@@ -523,6 +582,35 @@ ALTER TABLE `jobs`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `mentorship_feedback`
+--
+ALTER TABLE `mentorship_feedback`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `session_id` (`session_id`);
+
+--
+-- Indexes for table `mentorship_sessions`
+--
+ALTER TABLE `mentorship_sessions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `mentee_id` (`mentee_id`),
+  ADD KEY `mentor_id` (`mentor_id`);
+
+--
+-- Indexes for table `mentor_availabilities`
+--
+ALTER TABLE `mentor_availabilities`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `mentor_id` (`mentor_id`);
+
+--
+-- Indexes for table `mentor_profiles`
+--
+ALTER TABLE `mentor_profiles`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `roadmaps`
 --
 ALTER TABLE `roadmaps`
@@ -630,6 +718,31 @@ ALTER TABLE `cv_review_sections`
 --
 ALTER TABLE `cv_submissions`
   ADD CONSTRAINT `cv_submissions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `mentorship_feedback`
+--
+ALTER TABLE `mentorship_feedback`
+  ADD CONSTRAINT `mentorship_feedback_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `mentorship_sessions` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mentorship_sessions`
+--
+ALTER TABLE `mentorship_sessions`
+  ADD CONSTRAINT `mentorship_sessions_ibfk_1` FOREIGN KEY (`mentee_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `mentorship_sessions_ibfk_2` FOREIGN KEY (`mentor_id`) REFERENCES `mentor_profiles` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mentor_availabilities`
+--
+ALTER TABLE `mentor_availabilities`
+  ADD CONSTRAINT `mentor_availabilities_ibfk_1` FOREIGN KEY (`mentor_id`) REFERENCES `mentor_profiles` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mentor_profiles`
+--
+ALTER TABLE `mentor_profiles`
+  ADD CONSTRAINT `mentor_profiles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `roadmap_steps`
