@@ -16,6 +16,7 @@ from core.course_enroll import (
     enroll_course, unenroll_course,
     complete_course, list_user_enrollments
 )
+from werkzeug.security import generate_password_hash
 
 dotenv.load_dotenv()
 
@@ -40,7 +41,8 @@ from core.models import (
     WorkExperience, 
     Roadmap, RoadmapStep,
     UserRoadmap, UserRoadmapProgress, Achievement,
-    CourseEnrollment, Course, Job
+    CourseEnrollment, Course, Job, MentorProfile, MentorAvailability,
+    MentorshipSession, MentorshipFeedback
 )
 
 # Create tables immediately to ensure schema is in place
@@ -70,38 +72,47 @@ def health_check():
 def register():
     data = request.get_json() or {}
     username = data.get('username')
-    password = data.get('password')
-    if not username or not password:
+    raw_pw   = data.get('password')
+    if not username or not raw_pw:
         return jsonify({'error': 'Parameters username and password are required.'}), 400
+
     if User.query.filter_by(username=username).first():
         return jsonify({'error': 'Username is already registered.'}), 400
+
+    # hash the password
+    hashed_pw = generate_password_hash(raw_pw)
 
     user = User(
         id=str(uuid.uuid4()),
         username=username,
-        password=password,
+        password=hashed_pw,
         name=data.get('name', ''),
         email=data.get('email', '')
     )
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({'message': 'Registration successful.',}), 201
+    return jsonify({'message': 'Registration successful.'}), 201
+
 
 # User Login
+from werkzeug.security import check_password_hash
+# …
+
 @app.route('/api/v1/auth/user/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
     username = data.get('username')
-    password = data.get('password')
-    if not username or not password:
+    raw_pw   = data.get('password')
+    if not username or not raw_pw:
         return jsonify({'error': 'Parameters username and password are required.'}), 400
 
-    user = User.query.filter_by(username=username, password=password).first()
-    if not user:
+    user = User.query.filter_by(username=username).first()
+    if not user or not check_password_hash(user.password, raw_pw):
         return jsonify({'error': 'Incorrect username or password.'}), 401
 
-    return jsonify({'message': 'Login successful.', 'user': serialize(user)}), 200
+    return jsonify({'message': 'Login successful.', 'user': user.to_dict()}), 200
+
 
 # User Update
 @app.route('/api/v1/auth/user/update', methods=['PUT'])
@@ -775,6 +786,90 @@ def list_achievements(user_id):
             }
         })
     return jsonify(out), 200
+
+# -------------------- Mentorship Endpoints --------------------
+
+# 1. Register as mentor
+@app.route('/api/v1/mentorship/register', methods=['POST'])
+def register_mentor():
+    data = request.get_json() or {}
+    user = User.query.get(data.get('user_id')) or abort(404, 'User not found')
+    if user.is_mentor:
+        return jsonify({'error':'Already a mentor'}), 400
+    profile = MentorProfile(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        expertise=data.get('expertise',''),
+        bio=data.get('bio','')
+    )
+    user.is_mentor = True
+    db.session.add(profile)
+    db.session.commit()
+    return jsonify(profile.to_dict()), 201
+
+# 2. Search/List mentors
+@app.route('/api/v1/mentorship/mentors', methods=['GET'])
+def list_mentors():
+    q = request.args.get('q','')
+    mentors = MentorProfile.query.filter(MentorProfile.expertise.ilike(f'%{q}%')).all()
+    return jsonify([m.to_dict() for m in mentors]), 200
+
+# 3. Set availability
+@app.route('/api/v1/mentorship/mentors/<mentor_id>/availability', methods=['POST'])
+def set_availability(mentor_id):
+    mentor = MentorProfile.query.get(mentor_id) or abort(404, 'Mentor not found')
+    data = request.get_json() or {}
+    avail = MentorAvailability(
+        id=str(uuid.uuid4()),
+        mentor_id=mentor.id,
+        start_datetime=datetime.fromisoformat(data['start_datetime']),
+        end_datetime=datetime.fromisoformat(data['end_datetime'])
+    )
+    db.session.add(avail)
+    db.session.commit()
+    return jsonify(avail.to_dict()), 201
+
+# 4. Get availability
+@app.route('/api/v1/mentorship/mentors/<mentor_id>/availability', methods=['GET'])
+def get_availability(mentor_id):
+    avails = MentorAvailability.query.filter_by(mentor_id=mentor_id).all()
+    return jsonify([a.to_dict() for a in avails]), 200
+
+# 5. Book session
+@app.route('/api/v1/mentorship/sessions', methods=['POST'])
+def book_session():
+    data = request.get_json() or {}
+    avail = MentorAvailability.query.get(data.get('availability_id')) or abort(404, 'Slot not found')
+    meet_link = f"https://meet.google.com/{''.join(random.choices('abcdefghijklmnopqrstuvwxyz',k=10))}"
+    sess = MentorshipSession(
+        id=str(uuid.uuid4()),
+        mentee_id=data.get('mentee_id'),
+        mentor_id=avail.mentor_id,
+        scheduled_at=avail.start_datetime,
+        meet_link=meet_link
+    )
+    db.session.add(sess)
+    db.session.delete(avail)  # block slot
+    db.session.commit()
+    return jsonify(sess.to_dict()), 201
+
+# 6. Submit feedback
+@app.route('/api/v1/mentorship/sessions/<session_id>/feedback', methods=['POST'])
+def submit_feedback(session_id):
+    sess = MentorshipSession.query.get(session_id) or abort(404, 'Session not found')
+    if sess.feedback:
+        return jsonify({'error':'Feedback already submitted'}), 400
+    data = request.get_json() or {}
+    fb = MentorshipFeedback(
+        id=str(uuid.uuid4()),
+        session_id=sess.id,
+        rating=data.get('rating'),
+        feedback=data.get('feedback','')
+    )
+    sess.completed = True
+    db.session.add(fb)
+    db.session.commit()
+    return jsonify(fb.to_dict()), 201
 
 if __name__ == '__main__':
     app.run(debug=True)

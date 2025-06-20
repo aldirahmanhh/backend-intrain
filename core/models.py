@@ -3,6 +3,7 @@ import uuid
 import json
 from datetime import datetime
 from core.db import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class HRLevel(db.Model):
     __tablename__ = 'hr_levels'
@@ -28,14 +29,30 @@ class User(db.Model):
     email         = db.Column(db.String(100), unique=True)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # ————— Mentorship fields & relasi —————
+    is_mentor         = db.Column(db.Boolean, default=False, nullable=False)
+    mentor_profile    = db.relationship('MentorProfile', uselist=False, back_populates='user', cascade='all, delete-orphan')
+    mentee_sessions   = db.relationship('MentorshipSession', back_populates='mentee', cascade='all, delete-orphan')
+
+    def set_password(self, raw_password):
+        """Hash & store the password."""
+        self.password = generate_password_hash(raw_password)
+
+    def check_password(self, raw_password) -> bool:
+        """Return True if raw_password matches the stored hash."""
+        return check_password_hash(self.password, raw_password)
+
     def to_dict(self):
-        return dict(
-            id=self.id,
-            username=self.username,
-            name=self.name,
-            email=self.email,
-            created_at=self.created_at.isoformat()
-        )
+        # don’t include password!
+        return {
+            'id': self.id,
+            'username': self.username,
+            'name': self.name,
+            'email': self.email,
+            'created_at': self.created_at.isoformat(),
+            'is_mentor': self.is_mentor
+        }
+    
 class ChatSession(db.Model):
     __tablename__ = 'chat_sessions'
     id              = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -330,4 +347,86 @@ class Achievement(db.Model):
             'user_id':    self.user_id,
             'roadmap_id': self.roadmap_id,
             'earned_at':  self.earned_at.isoformat()
+        }
+
+class MentorProfile(db.Model):
+    __tablename__ = 'mentor_profiles'
+    id           = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id      = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False, unique=True)
+    expertise    = db.Column(db.String(200), nullable=False)
+    bio          = db.Column(db.Text)
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user         = db.relationship('User', back_populates='mentor_profile')
+    availabilities = db.relationship('MentorAvailability', back_populates='mentor', cascade='all, delete-orphan')
+    sessions       = db.relationship('MentorshipSession', back_populates='mentor', cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id':         self.id,
+            'user_id':    self.user_id,
+            'expertise':  self.expertise,
+            'bio':        self.bio,
+            'created_at': self.created_at.isoformat()
+        }
+
+class MentorAvailability(db.Model):
+    __tablename__ = 'mentor_availabilities'
+    id             = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    mentor_id      = db.Column(db.String(36), db.ForeignKey('mentor_profiles.id'), nullable=False)
+    start_datetime = db.Column(db.DateTime, nullable=False)
+    end_datetime   = db.Column(db.DateTime, nullable=False)
+
+    mentor         = db.relationship('MentorProfile', back_populates='availabilities')
+
+    def to_dict(self):
+        return {
+            'id':             self.id,
+            'mentor_id':      self.mentor_id,
+            'start_datetime': self.start_datetime.isoformat(),
+            'end_datetime':   self.end_datetime.isoformat()
+        }
+
+class MentorshipSession(db.Model):
+    __tablename__ = 'mentorship_sessions'
+    id            = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    mentee_id     = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    mentor_id     = db.Column(db.String(36), db.ForeignKey('mentor_profiles.id'), nullable=False)
+    scheduled_at  = db.Column(db.DateTime, nullable=False)
+    meet_link     = db.Column(db.String(300), nullable=False)
+    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    completed     = db.Column(db.Boolean, default=False, nullable=False)
+
+    mentee        = db.relationship('User', back_populates='mentee_sessions')
+    mentor        = db.relationship('MentorProfile', back_populates='sessions')
+    feedback      = db.relationship('MentorshipFeedback', back_populates='session', uselist=False, cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id':            self.id,
+            'mentee_id':     self.mentee_id,
+            'mentor_id':     self.mentor_id,
+            'scheduled_at':  self.scheduled_at.isoformat(),
+            'meet_link':     self.meet_link,
+            'created_at':    self.created_at.isoformat(),
+            'completed':     self.completed
+        }
+
+class MentorshipFeedback(db.Model):
+    __tablename__ = 'mentorship_feedback'
+    id          = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id  = db.Column(db.String(36), db.ForeignKey('mentorship_sessions.id'), nullable=False)
+    rating      = db.Column(db.SmallInteger, nullable=False)  # 1–5
+    feedback    = db.Column(db.Text)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    session     = db.relationship('MentorshipSession', back_populates='feedback')
+
+    def to_dict(self):
+        return {
+            'id':          self.id,
+            'session_id':  self.session_id,
+            'rating':      self.rating,
+            'feedback':    self.feedback,
+            'created_at':  self.created_at.isoformat()
         }
