@@ -872,5 +872,54 @@ def submit_feedback(session_id):
     db.session.commit()
     return jsonify(fb.to_dict()), 201
 
+@app.route('/api/v1/mentorship/mentors/<mentor_id>/profile', methods=['GET'])
+def get_mentor_profile(mentor_id):
+    # 1) Load the mentor profile
+    profile = MentorProfile.query.get(mentor_id)
+    if not profile:
+        abort(404, description='Mentor not found')
+
+    # 2) Load the underlying user
+    user = User.query.get(profile.user_id)
+    if not user:
+        abort(404, description='User not found')
+
+    # 3) Load all work experiences for that mentor's user
+    experiences = (
+        WorkExperience.query
+        .filter_by(user_id=profile.user_id)
+        .order_by(WorkExperience.start_year.desc(), WorkExperience.start_month.desc())
+        .all()
+    )
+
+    # 4) Build pared-down list of experiences
+    work_list = []
+    for exp in experiences:
+        work_list.append({
+            'id':           exp.id,
+            'job_title':    exp.job_title,
+            'company_name': exp.company_name,
+            'job_desc':     exp.job_desc,
+            'start_month':  exp.start_month,
+            'start_year':   exp.start_year,
+            'end_month':    exp.end_month,
+            'end_year':     exp.end_year,
+            'is_current':   exp.is_current
+        })
+
+    # 5) Build response including user name
+    resp = {
+        'mentor_profile': {
+            'id':          profile.id,
+            'user_id':     profile.user_id,
+            'name':        user.name,         # <-- include name here
+            'expertise':   profile.expertise,
+            'bio':         profile.bio,
+            'created_at':  profile.created_at.isoformat()
+        },
+        'work_experiences': work_list
+    }
+    return jsonify(resp), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
