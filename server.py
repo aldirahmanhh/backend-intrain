@@ -173,8 +173,8 @@ def chat():
             "type": "question",
             "question_number": 1,
             "question_text": (
-                "Please introduce yourself: your name, current role, "
-                "and how many years of experience you have."
+                "Perkenalkan diri Anda: nama Anda, peran saat ini, "
+                "dan berapa tahun pengalaman yang Anda miliki."
             )
         }
         db.session.add(ChatMessage(
@@ -212,9 +212,9 @@ def chat():
     if len(asked) >= session.total_questions:
         # Build the AI prompt
         eval_prompt = (
-            "You are an expert HR evaluator. Now that the interview is complete, "
-            "review ALL candidate responses and OUTPUT ONLY RAW JSON in this exact format "
-            "(no markdown, no fences):\n\n"
+            "Anda adalah evaluator HR ahli. Sekarang setelah wawancara selesai, "
+            "tinjau SEMUA jawaban kandidat dan KELUARKAN HANYA JSON MENTAH "
+            "dalam format persis berikut (tanpa markdown, tanpa fences):\n\n"
             "{\n"
             '  "score": <integer 1-10>,\n'
             '  "recommendations": [\n'
@@ -223,6 +223,7 @@ def chat():
             '  ]\n'
             "}\n"
         )
+   
 
         # Assemble messages for Gemini
         msgs = [{ "role": "system", "content": eval_prompt }]
