@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 28, 2025 at 09:30 AM
+-- Generation Time: Jun 28, 2025 at 05:03 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -378,6 +378,13 @@ CREATE TABLE `mentor_profiles` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `mentor_profiles`
+--
+
+INSERT INTO `mentor_profiles` (`id`, `user_id`, `expertise`, `bio`, `created_at`) VALUES
+('3f055250-c9ad-4125-aa01-c3530b407707', '4c87d980-7457-4df1-ba12-c152b948b762', 'Data Science', '10 Years of Data Science Fields.', '2025-06-28 12:24:47');
+
 -- --------------------------------------------------------
 
 --
@@ -471,7 +478,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `name`, `email`, `created_at`, `is_mentor`) VALUES
-('4c87d980-7457-4df1-ba12-c152b948b762', 'admin', 'scrypt:32768:8:1$WstwojMgummixFGV$de5f878e90cc64b1a9a35ea355ab94c63fa4226f35eae3227c1be829bf2daa17b0711d6cf72fb98d549f23b4ca7758850e2a51f5deaff65842f5d58cca0a6317', 'Administrator', 'admin@intrain.ai', '2025-06-20 14:06:04', 0);
+('4c87d980-7457-4df1-ba12-c152b948b762', 'admin', 'scrypt:32768:8:1$WstwojMgummixFGV$de5f878e90cc64b1a9a35ea355ab94c63fa4226f35eae3227c1be829bf2daa17b0711d6cf72fb98d549f23b4ca7758850e2a51f5deaff65842f5d58cca0a6317', 'Administrator', 'admin@intrain.ai', '2025-06-20 14:06:04', 1),
+('b0cd2bf4-ca89-4b79-be6b-97901459a31c', 'john_doe', 'scrypt:32768:8:1$7HgWXanSa9SqaazZ$df7e50fc4d6638aee72bc1b9d2df385c4438f9165490dd6dcdc106ebacb82d06292279c441bac174461cc1939c3b417b4918c3325cc206b32b287d6e7358d5c4', 'John Doe', 'john.doe@email.com', '2025-06-28 14:27:42', 0);
 
 -- --------------------------------------------------------
 
@@ -518,6 +526,15 @@ CREATE TABLE `work_experiences` (
   `is_current` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = On Going',
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `work_experiences`
+--
+
+INSERT INTO `work_experiences` (`id`, `user_id`, `job_title`, `company_name`, `job_desc`, `start_month`, `start_year`, `end_month`, `end_year`, `is_current`, `created_at`) VALUES
+('091008f8-88f6-4842-8572-5f545862cf69', '4c87d980-7457-4df1-ba12-c152b948b762', 'Senior Machine Learning Engineer', 'Insight Labs', 'Led end-to-end ML pipeline development, from feature engineering to monitoring.', 9, 2022, NULL, NULL, 1, '2025-06-28 21:46:47'),
+('3a1f7e88-36bf-45ab-bf42-cfbdd400b70f', '4c87d980-7457-4df1-ba12-c152b948b762', 'Data Analyst', 'MarketMetrics', 'Performed exploratory data analysis and built dashboards in Power BI.', 1, 2020, 2, 2021, 0, '2025-06-28 21:46:47'),
+('bebe3b92-0600-4a9d-a372-02920b6a142f', '4c87d980-7457-4df1-ba12-c152b948b762', 'Data Scientist', 'DataCorp Analytics', 'Built predictive models using scikit-learn and deployed them as REST APIs.', 3, 2021, 8, 2022, 0, '2025-06-28 21:46:47');
 
 --
 -- Indexes for dumped tables
