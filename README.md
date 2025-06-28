@@ -996,35 +996,35 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
         "job_type": "Cybersecurity Analyst",
         "steps": [
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Learn OSI model, TCP/IP, and common network protocols.",
                 "id": "eafe2fbd-2a8f-4038-843b-b3cd0f62a298",
                 "step_order": 1,
                 "title": "Networking Fundamentals"
             },
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Harden Linux systems and understand permissions.",
                 "id": "3c2bdff8-d48b-45be-bae6-a7da65cc71ec",
                 "step_order": 2,
                 "title": "Linux Security Basics"
             },
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Study and practice preventing the OWASP Top 10 web flaws.",
                 "id": "b9906303-a0e2-417b-93d5-59b608a16bd4",
                 "step_order": 3,
                 "title": "OWASP Top 10 Vulnerabilities"
             },
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Perform basic pentests using Metasploit Framework.",
                 "id": "7be58ce9-56c1-4447-b8ce-affe6208c8df",
                 "step_order": 4,
                 "title": "Penetration Testing with Metasploit"
             },
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Set up log aggregation and alerts with a SIEM tool.",
                 "id": "646c0bd1-cce3-48cb-ab19-d7cbb38dddff",
                 "step_order": 5,
@@ -1039,35 +1039,35 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
         "job_type": "Data Scientist",
         "steps": [
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Cover NumPy, Pandas, and data manipulation basics.",
                 "id": "4b49e0be-b6e0-4254-9867-c1fc93c691d3",
                 "step_order": 1,
                 "title": "Learn Python for Data Science"
             },
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Understand descriptive stats, distributions, and hypothesis testing.",
                 "id": "e5cf6782-04ff-4485-b124-250b30bf0f0c",
                 "step_order": 2,
                 "title": "Statistics & Probability Basics"
             },
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Perform real-world data cleaning and exploratory analysis.",
                 "id": "2358c538-a3e0-48af-9151-b488f8bdb7c1",
                 "step_order": 3,
                 "title": "Data Analysis with Pandas"
             },
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Learn supervised & unsupervised algorithms with scikit-learn.",
                 "id": "55ea7c75-c618-41c7-baee-978454561b53",
                 "step_order": 4,
                 "title": "Machine Learning Fundamentals"
             },
             {
-                "course_id": null,
+                "course_id": (course_id),
                 "description": "Wrap ML models into REST APIs using Flask or FastAPI.",
                 "id": "5dcfd264-5d20-40c2-99c3-646a7c76479d",
                 "step_order": 5,
@@ -1104,35 +1104,35 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     "job_type": "Frontend Developer",
     "steps": [
         {
-            "course_id": null, (Null/Dummy for Now - Admin must fill it manually | Next Update will integrated with the courses)
+            "course_id": (course_id), (Null/Dummy for Now - Admin must fill it manually | Next Update will integrated with the courses)
             "description": "Learn semantic HTML and responsive CSS layouts.",
             "id": "0f92bfa6-1799-4e5e-b394-64d3ea146ed1",
             "step_order": 1,
             "title": "HTML & CSS Fundamentals"
         },
         {
-            "course_id": null,
+            "course_id": (course_id),
             "description": "Understand modern JS syntax, promises, and async/await.",
             "id": "4c5aa5ca-6bab-459b-abdc-aa36f57ded21",
             "step_order": 2,
             "title": "JavaScript ES6+ Features"
         },
         {
-            "course_id": null,
+            "course_id": (course_id),
             "description": "Build component-based UIs with React and JSX.",
             "id": "528d17f5-e209-4f41-bb72-8d470e6554d8",
             "step_order": 3,
             "title": "React.js Basics"
         },
         {
-            "course_id": null,
+            "course_id": (course_id),
             "description": "Manage complex app state using Redux patterns.",
             "id": "29ef7677-16ae-468e-84b3-1d0b0b737121",
             "step_order": 4,
             "title": "State Management with Redux"
         },
         {
-            "course_id": null,
+            "course_id": (course_id),
             "description": "Write unit and integration tests for React components.",
             "id": "eb342862-542b-41c1-9312-62b667df8116",
             "step_order": 5,
@@ -1196,35 +1196,35 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
             "job_type": "Frontend Developer",
             "steps": [
                 {
-                    "course_id": null,
+                    "course_id": (course_id),
                     "description": "Learn semantic HTML and responsive CSS layouts.",
                     "id": "0f92bfa6-1799-4e5e-b394-64d3ea146ed1",
                     "step_order": 1,
                     "title": "HTML & CSS Fundamentals"
                 },
                 {
-                    "course_id": null,
+                    "course_id": (course_id),
                     "description": "Understand modern JS syntax, promises, and async/await.",
                     "id": "4c5aa5ca-6bab-459b-abdc-aa36f57ded21",
                     "step_order": 2,
                     "title": "JavaScript ES6+ Features"
                 },
                 {
-                    "course_id": null,
+                    "course_id": (course_id),
                     "description": "Build component-based UIs with React and JSX.",
                     "id": "528d17f5-e209-4f41-bb72-8d470e6554d8",
                     "step_order": 3,
                     "title": "React.js Basics"
                 },
                 {
-                    "course_id": null,
+                    "course_id": (course_id),
                     "description": "Manage complex app state using Redux patterns.",
                     "id": "29ef7677-16ae-468e-84b3-1d0b0b737121",
                     "step_order": 4,
                     "title": "State Management with Redux"
                 },
                 {
-                    "course_id": null,
+                    "course_id": (course_id),
                     "description": "Write unit and integration tests for React components.",
                     "id": "eb342862-542b-41c1-9312-62b667df8116",
                     "step_order": 5,
@@ -1287,7 +1287,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     {
         "completed": false, (Will change True if the user marked as complete)
         "completed_at": null,
-        "course_id": null,
+        "course_id": (course_id),
         "description": "Learn semantic HTML and responsive CSS layouts.",
         "id": "0f92bfa6-1799-4e5e-b394-64d3ea146ed1",
         "step_order": 1,
@@ -1296,7 +1296,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     {
         "completed": false,
         "completed_at": null,
-        "course_id": null,
+        "course_id": (course_id),
         "description": "Understand modern JS syntax, promises, and async/await.",
         "id": "4c5aa5ca-6bab-459b-abdc-aa36f57ded21",
         "step_order": 2,
@@ -1305,7 +1305,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     {
         "completed": false,
         "completed_at": null,
-        "course_id": null,
+        "course_id": (course_id),
         "description": "Build component-based UIs with React and JSX.",
         "id": "528d17f5-e209-4f41-bb72-8d470e6554d8",
         "step_order": 3,
@@ -1314,7 +1314,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     {
         "completed": false,
         "completed_at": null,
-        "course_id": null,
+        "course_id": (course_id),
         "description": "Manage complex app state using Redux patterns.",
         "id": "29ef7677-16ae-468e-84b3-1d0b0b737121",
         "step_order": 4,
@@ -1323,7 +1323,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     {
         "completed": false,
         "completed_at": null,
-        "course_id": null,
+        "course_id": (course_id),
         "description": "Write unit and integration tests for React components.",
         "id": "eb342862-542b-41c1-9312-62b667df8116",
         "step_order": 5,
@@ -1338,7 +1338,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     {
         "completed": true,
         "completed_at": "2025-04-27T16:09:52",
-        "course_id": null,
+        "course_id": (course_id),
         "description": "Learn semantic HTML and responsive CSS layouts.",
         "id": "0f92bfa6-1799-4e5e-b394-64d3ea146ed1",
         "step_order": 1,
@@ -1396,6 +1396,279 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
 - Request URL
 ```bash
 {base}/api/v1/users/db604ac8-93cd-4d62-80a3-1f6900190bfa/roadmaps/ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3
+```
+
+### Register as a Mentor
+
+---
+
+- Method: ```POST```
+
+- URL:
+```bash
+{base}/api/v1/mentorship/register
+```
+
+- Request Body:
+```json
+{
+  "user_id": "4c87d980-7457-4df1-ba12-c152b948b762",
+  "expertise": "Data Science",
+  "bio": "10 Years of Data Science Fields."
+}
+```
+
+- Response:
+```json
+{
+    "bio": "10 Years of Data Science Fields.",
+    "created_at": "2025-06-28T12:24:47",
+    "expertise": "Data Science",
+    "id": "3f055250-c9ad-4125-aa01-c3530b407707",
+    "user_id": "4c87d980-7457-4df1-ba12-c152b948b762"
+}
+```
+
+### List Mentors
+
+---
+
+- Method: ```GET```
+
+- URL:
+```bash
+{base}/api/v1/mentorship/mentors
+```
+
+- Response:
+```json
+[
+    {
+        "bio": "10 Years of Data Science Fields.",
+        "created_at": "2025-06-28T12:24:47",
+        "expertise": "Data Science",
+        "id": "3f055250-c9ad-4125-aa01-c3530b407707",
+        "user_id": "4c87d980-7457-4df1-ba12-c152b948b762"
+    },
+    ...
+]
+```
+
+### Search Mentors
+
+---
+
+- Method: ```GET```
+
+- URL:
+```bash
+{base}/api/v1/mentorship/mentors?q=data
+
+For the "q" using full lowercase & use "_" as space
+```
+
+- Response:
+```json
+[
+    {
+        "bio": "10 Years of Data Science Fields.",
+        "created_at": "2025-06-28T12:24:47",
+        "expertise": "Data Science",
+        "id": "3f055250-c9ad-4125-aa01-c3530b407707",
+        "user_id": "4c87d980-7457-4df1-ba12-c152b948b762"
+    },
+    ... (List of Searcheable Mentors)
+]
+```
+### Mentor Create a Schedule
+
+---
+
+- Method: ```POST```
+
+- URL:
+```bash
+{base}/api/v1/mentorship/mentors/<mentor_id>/availability
+```
+
+- Request Body:
+```json
+{
+  "start_datetime": "2025-06-22T14:00:00",
+  "end_datetime":   "2025-06-22T16:00:00"
+}
+```
+- Response:
+```json
+{
+    "end_datetime": "2025-06-22T16:00:00",
+    "id": "04ab1b8c-1893-4c4d-8eb8-4b190633ac9a",
+    "mentor_id": "3f055250-c9ad-4125-aa01-c3530b407707",
+    "start_datetime": "2025-06-22T14:00:00"
+}
+```
+
+### Get Mentor List Availability Schedule
+
+--- 
+
+- Method: ```GET```
+
+- Request URL:
+```bash
+{base}/api/v1/mentorship/mentors/<mentor_id>/availability
+```
+
+- Request URL:
+```bash
+{base}/api/v1/mentorship/mentors/3f055250-c9ad-4125-aa01-c3530b407707/availability
+```
+
+- Response:
+```json
+[
+    {
+        "end_datetime": "2025-06-22T16:00:00",
+        "id": "04ab1b8c-1893-4c4d-8eb8-4b190633ac9a",
+        "mentor_id": "3f055250-c9ad-4125-aa01-c3530b407707",
+        "start_datetime": "2025-06-22T14:00:00"
+    },
+    ...
+]
+```
+
+### Book Mentoring Session
+
+---
+
+- Method: ```POST```
+
+- URL:
+```bash
+{base}/api/v1/mentorship/sessions
+```
+
+- Request Body:
+```json
+{
+  "mentee_id": "b0cd2bf4-ca89-4b79-be6b-97901459a31c", (User ID)
+  "availability_id": "04ab1b8c-1893-4c4d-8eb8-4b190633ac9a"
+}
+```
+
+- Response:
+```json
+{
+    "completed": false, (Automatic change if user already submit a feedback after mentoring session)
+    "created_at": "2025-06-28T14:30:02",
+    "id": "cdfbb1d8-401f-4bf1-bdc8-a69809f8e390",
+    "meet_link": "https://meet.google.com/fgndpczspe",
+    "mentee_id": "b0cd2bf4-ca89-4b79-be6b-97901459a31c",
+    "mentor_id": "3f055250-c9ad-4125-aa01-c3530b407707",
+    "scheduled_at": "2025-06-22T14:00:00"
+}
+```
+
+### Submit Feedback after Mentoring Session
+
+---
+
+- Method: ```POST```
+
+- URL:
+```bash
+{base}/api/v1/mentorship/sessions/<session_id>/feedback
+```
+
+- Request URL:
+```bash
+{base}/api/v1/mentorship/sessions/cdfbb1d8-401f-4bf1-bdc8-a69809f8e390
+/feedback
+```
+
+- Request Body:
+```json
+{
+  "rating": 5,
+  "feedback": "Mentor explain everything in a good ways"
+}
+```
+
+- Response:
+```json
+{
+    "created_at": "2025-06-28T14:34:58",
+    "feedback": "Mentor explain everything in a good ways",
+    "id": "3602ca75-d851-46db-ac13-26acab5756ac",
+    "rating": 5,
+    "session_id": "cdfbb1d8-401f-4bf1-bdc8-a69809f8e390"
+}
+```
+
+### See Mentor Profile
+
+---
+
+- Method: ```GET```
+
+- URL:
+```json
+{base}/api/v1/mentorship/mentors/<mentor_id>/profile
+```
+
+- Request URL:
+```json
+{base}/api/v1/mentorship/mentors/3f055250-c9ad-4125-aa01-c3530b407707/profile
+```
+
+- Response:
+```json
+{
+    "mentor_profile": {
+        "bio": "10 Years of Data Science Fields.",
+        "created_at": "2025-06-28T12:24:47",
+        "expertise": "Data Science",
+        "id": "3f055250-c9ad-4125-aa01-c3530b407707",
+        "name": "Administrator",
+        "user_id": "4c87d980-7457-4df1-ba12-c152b948b762"
+    },
+    "work_experiences": [
+        {
+            "company_name": "Insight Labs",
+            "end_month": null,
+            "end_year": null,
+            "id": "091008f8-88f6-4842-8572-5f545862cf69",
+            "is_current": true,
+            "job_desc": "Led end-to-end ML pipeline development, from feature engineering to monitoring.",
+            "job_title": "Senior Machine Learning Engineer",
+            "start_month": 9,
+            "start_year": 2022
+        },
+        {
+            "company_name": "DataCorp Analytics",
+            "end_month": 8,
+            "end_year": 2022,
+            "id": "bebe3b92-0600-4a9d-a372-02920b6a142f",
+            "is_current": false,
+            "job_desc": "Built predictive models using scikit-learn and deployed them as REST APIs.",
+            "job_title": "Data Scientist",
+            "start_month": 3,
+            "start_year": 2021
+        },
+        {
+            "company_name": "MarketMetrics",
+            "end_month": 2,
+            "end_year": 2021,
+            "id": "3a1f7e88-36bf-45ab-bf42-cfbdd400b70f",
+            "is_current": false,
+            "job_desc": "Performed exploratory data analysis and built dashboards in Power BI.",
+            "job_title": "Data Analyst",
+            "start_month": 1,
+            "start_year": 2020
+        },
+        ...
+    ]
+}
 ```
 
 ### Cloud Architecture
