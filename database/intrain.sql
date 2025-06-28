@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 28, 2025 at 06:58 AM
+-- Generation Time: Jun 28, 2025 at 09:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -97,6 +97,7 @@ CREATE TABLE `courses` (
 --
 
 INSERT INTO `courses` (`id`, `title`, `description`, `provider`, `url`, `created_at`) VALUES
+('012846f7-2c68-42f0-a311-e5fe4b20220d', 'Model Deployment with Flask', 'Wrap ML models into REST APIs using Flask or FastAPI.', 'Udemy', 'https://example.com/model-deployment-flask', '2025-06-28 12:50:55'),
 ('072eb182-07ca-41e1-a40b-f5cc3a2f4360', 'Blockchain Basics', 'Description for Blockchain Basics.', 'Udemy', 'https://example.com/blockchain-basics', '2025-04-27 13:28:37'),
 ('07abfa23-51a0-4e6e-9480-852c22f42805', 'HTML & CSS Fundamentals', 'Learn semantic HTML5 and modern CSS layouts.', 'Udemy', 'https://example.com/html-css', '2025-06-28 11:56:17'),
 ('0b46be53-1298-4333-9706-efa3c607876b', 'AWS Certified Solutions Architect', 'Description for AWS Certified Solutions Architect.', 'Udemy', 'https://example.com/aws-certified-solutions-architect', '2025-04-27 13:28:37'),
@@ -106,6 +107,8 @@ INSERT INTO `courses` (`id`, `title`, `description`, `provider`, `url`, `created
 ('1f1778b8-f96b-4fa7-8362-9b19ab82d435', 'Docker and Kubernetes Fundamentals', 'Description for Docker and Kubernetes Fundamentals.', 'Udemy', 'https://example.com/docker-and-kubernetes-fundamentals', '2025-04-27 13:28:37'),
 ('27187f76-b668-4237-a245-5e39dda6d884', 'Machine Learning A-Z™: Hands-On', 'Practical ML algorithms with scikit-learn and Python.', 'Udemy', 'https://example.com/ml-az', '2025-06-28 11:56:17'),
 ('2acd6e54-e8b1-4c25-b860-65879cb71e4f', 'DevOps with Jenkins and Terraform', 'Description for DevOps with Jenkins and Terraform.', 'Udemy', 'https://example.com/devops-with-jenkins-and-terraform', '2025-04-27 13:28:37'),
+('2ca2cc8a-3493-428b-a721-0e58bb7cfd7d', 'Master Python Programming', 'Complete a comprehensive Python fundamentals course.', 'Udemy', 'https://example.com/master-python', '2025-06-28 12:50:55'),
+('31374796-6bc8-4755-9d03-9927af0e3956', 'Security Monitoring & SIEM', 'Set up log aggregation and alerts with a SIEM tool.', 'Udemy', 'https://example.com/security-monitoring-siem', '2025-06-28 12:50:55'),
 ('3d6c0a3b-e9ae-43bc-ae39-47b1eb3e1f1a', 'Web Security Fundamentals', 'Description for Web Security Fundamentals.', 'Udemy', 'https://example.com/web-security-fundamentals', '2025-04-27 13:28:37'),
 ('3e691e6a-d53e-4dd8-ad53-876fafb89019', 'C# Programming Fundamentals', 'Description for C# Programming Fundamentals.', 'Udemy', 'https://example.com/c#-programming-fundamentals', '2025-04-27 13:28:37'),
 ('465454ec-a2ee-4d14-a8c3-cb23ea6aba85', 'Advanced Java Programming', 'Description for Advanced Java Programming.', 'Udemy', 'https://example.com/advanced-java-programming', '2025-04-27 13:28:37'),
@@ -113,7 +116,7 @@ INSERT INTO `courses` (`id`, `title`, `description`, `provider`, `url`, `created
 ('538943a7-6800-4ed6-95f5-c72486ff6981', 'Redux for State Management', 'Manage complex application state with Redux patterns.', 'Udemy', 'https://example.com/redux-patterns', '2025-06-28 11:56:17'),
 ('5a745adf-6a69-4143-af10-85226173e6f8', 'Docker Mastery', 'Containerize applications and write Dockerfile best practices.', 'Udemy', 'https://example.com/docker-mastery', '2025-06-28 11:56:17'),
 ('65210dc7-a73b-4a14-b3a0-18ea5d10d872', 'Introduction to Java', 'Description for Introduction to Java.', 'Udemy', 'https://example.com/introduction-to-java', '2025-04-27 13:28:37'),
-('6ac62a35-aec7-459b-abe0-e33a199923b6', 'CI/CD with GitHub Actions', 'Automate builds, tests and deployments with GitHub Actions.', 'Udemy', 'https://example.com/github-actions', '2025-06-28 11:56:17'),
+('6ac62a35-aec7-459b-abe0-e33a199923b6', 'Mastering Jenkins', 'Mastering Jenkins in 5 Steps', 'Udemy', 'https://example.com/jenkins-mastery', '2025-06-28 11:56:17'),
 ('742aba42-c415-43b7-872e-0002d8f80736', 'Statistics & Probability for Data Science', 'Foundations of statistics, distributions, hypothesis testing.', 'Coursera', 'https://example.com/stats-ds', '2025-06-28 11:56:17'),
 ('84cdcbda-53e5-44ed-b3ca-57a97964687b', 'Network Administration Fundamentals', 'Description for Network Administration Fundamentals.', 'Udemy', 'https://example.com/network-administration-fundamentals', '2025-04-27 13:28:37'),
 ('8a8c64fb-d2bf-4962-be4f-3a289db93989', 'Business Analytics with Power BI', 'Description for Business Analytics with Power BI.', 'Udemy', 'https://example.com/business-analytics-with-power-bi', '2025-04-27 13:28:37'),
@@ -124,6 +127,8 @@ INSERT INTO `courses` (`id`, `title`, `description`, `provider`, `url`, `created
 ('b13ba382-eecb-4950-a114-8026a9d37723', 'SEO and SEM Strategies', 'Description for SEO and SEM Strategies.', 'Udemy', 'https://example.com/seo-and-sem-strategies', '2025-04-27 13:28:37'),
 ('b70144e6-aca8-4df8-a57e-8ac8b8698feb', 'Terraform: Infrastructure as Code', 'Provision and manage infrastructure with Terraform.', 'Udemy', 'https://example.com/terraform-iac', '2025-06-28 11:56:17'),
 ('bcd50e42-6173-424c-9d95-89f18c0454b0', 'Digital Marketing Essentials', 'Description for Digital Marketing Essentials.', 'Udemy', 'https://example.com/digital-marketing-essentials', '2025-04-27 13:28:37'),
+('db30cdc9-52ba-4cc7-8e2e-9bdcc0960839', 'Data Analysis with Pandas', 'Perform real-world data cleaning and exploratory analysis using Pandas.', 'Udemy', 'https://example.com/data-analysis-pandas', '2025-06-28 12:50:55'),
+('df79aca5-5985-4547-ab53-12b46cb24c19', 'Learn Python for Data Science', 'Cover NumPy, Pandas, and data manipulation basics.', 'Udemy', 'https://example.com/python-data-science', '2025-06-28 12:50:55'),
 ('e013b7b2-fc08-4a79-9cb6-53d2d7646b48', 'Linux System Administration', 'Description for Linux System Administration.', 'Udemy', 'https://example.com/linux-system-administration', '2025-04-27 13:28:37'),
 ('e03e4906-f7b7-49dc-9525-47c4eb58f78b', 'Mobile App Development with Flutter', 'Description for Mobile App Development with Flutter.', 'Udemy', 'https://example.com/mobile-app-development-with-flutter', '2025-04-27 13:28:37'),
 ('e2fef3fa-03a7-492d-9273-d552adc1e20e', 'Testing React with Jest', 'Write unit and integration tests for React components using Jest.', 'Udemy', 'https://example.com/jest-react', '2025-06-28 11:56:17'),
@@ -419,31 +424,31 @@ CREATE TABLE `roadmap_steps` (
 --
 
 INSERT INTO `roadmap_steps` (`id`, `roadmap_id`, `step_order`, `title`, `description`, `course_id`, `created_at`) VALUES
-('00e412f2-f0d0-4a8e-9e81-dd1324316afa', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 4, 'CI/CD with Jenkins', 'Build automated pipelines for test, build, and deploy.', NULL, '2025-04-27 21:58:59'),
-('02227790-88e7-476b-a024-7cbbea2af4c8', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 2, 'Master Python Programming', 'Complete a comprehensive Python fundamentals course.', NULL, '2025-04-27 21:58:59'),
-('0f92bfa6-1799-4e5e-b394-64d3ea146ed1', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 1, 'HTML & CSS Fundamentals', 'Learn semantic HTML and responsive CSS layouts.', NULL, '2025-04-27 21:58:59'),
-('1161ce63-6974-40a7-a58b-697df6e5345a', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 3, 'Kubernetes Orchestration', 'Deploy and manage containers at scale on Kubernetes.', NULL, '2025-04-27 21:58:59'),
-('2358c538-a3e0-48af-9151-b488f8bdb7c1', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 3, 'Data Analysis with Pandas', 'Perform real-world data cleaning and exploratory analysis.', NULL, '2025-04-27 21:58:59'),
-('29d19b89-0aa7-4726-9baf-fa1cffacfb03', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 1, 'Linux & Bash Essentials', 'Gain proficiency with Linux command line and shell scripting.', NULL, '2025-04-27 21:58:59'),
-('29ef7677-16ae-468e-84b3-1d0b0b737121', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 4, 'State Management with Redux', 'Manage complex app state using Redux patterns.', NULL, '2025-04-27 21:58:59'),
-('3c2bdff8-d48b-45be-bae6-a7da65cc71ec', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 2, 'Linux Security Basics', 'Harden Linux systems and understand permissions.', NULL, '2025-04-27 21:58:59'),
-('4b49e0be-b6e0-4254-9867-c1fc93c691d3', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 1, 'Learn Python for Data Science', 'Cover NumPy, Pandas, and data manipulation basics.', NULL, '2025-04-27 21:58:59'),
-('4c5aa5ca-6bab-459b-abdc-aa36f57ded21', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 2, 'JavaScript ES6+ Features', 'Understand modern JS syntax, promises, and async/await.', NULL, '2025-04-27 21:58:59'),
-('528d17f5-e209-4f41-bb72-8d470e6554d8', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 3, 'React.js Basics', 'Build component-based UIs with React and JSX.', NULL, '2025-04-27 21:58:59'),
-('55ea7c75-c618-41c7-baee-978454561b53', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 4, 'Machine Learning Fundamentals', 'Learn supervised & unsupervised algorithms with scikit-learn.', NULL, '2025-04-27 21:58:59'),
-('5dcfd264-5d20-40c2-99c3-646a7c76479d', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 5, 'Model Deployment with Flask', 'Wrap ML models into REST APIs using Flask or FastAPI.', NULL, '2025-04-27 21:58:59'),
-('646c0bd1-cce3-48cb-ab19-d7cbb38dddff', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 5, 'Security Monitoring & SIEM', 'Set up log aggregation and alerts with a SIEM tool.', NULL, '2025-04-27 21:58:59'),
-('7bcf9028-48ed-4019-b5f9-966910072b1d', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 1, 'Learn Data Structures & Algorithms', 'Master common data structures and algorithms in your language of choice.', NULL, '2025-04-27 21:58:59'),
-('7be58ce9-56c1-4447-b8ce-affe6208c8df', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 4, 'Penetration Testing with Metasploit', 'Perform basic pentests using Metasploit Framework.', NULL, '2025-04-27 21:58:59'),
-('846cec40-5407-482e-b97d-ed1a00076bc6', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 5, 'Implement CI/CD Pipelines', 'Set up continuous integration and delivery with Jenkins or GitHub Actions.', NULL, '2025-04-27 21:58:59'),
-('b7dfc3c2-4554-49f3-acf2-4d8cbc3a28bf', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 4, 'Understand Database Systems', 'Learn SQL, schema design, and indexing strategies.', NULL, '2025-04-27 21:58:59'),
-('b9906303-a0e2-417b-93d5-59b608a16bd4', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 3, 'OWASP Top 10 Vulnerabilities', 'Study and practice preventing the OWASP Top 10 web flaws.', NULL, '2025-04-27 21:58:59'),
-('d8a668fa-901d-4e7c-b9a7-8071802083ab', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 5, 'Infrastructure as Code with Terraform', 'Provision and manage cloud resources using Terraform.', NULL, '2025-04-27 21:58:59'),
-('e3e8d14a-edb5-4448-8006-feba74fe1a9a', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 3, 'Build REST APIs with Flask', 'Develop and deploy RESTful APIs using Flask framework.', NULL, '2025-04-27 21:58:59'),
-('e5cf6782-04ff-4485-b124-250b30bf0f0c', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 2, 'Statistics & Probability Basics', 'Understand descriptive stats, distributions, and hypothesis testing.', NULL, '2025-04-27 21:58:59'),
-('eafe2fbd-2a8f-4038-843b-b3cd0f62a298', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 1, 'Networking Fundamentals', 'Learn OSI model, TCP/IP, and common network protocols.', NULL, '2025-04-27 21:58:59'),
-('eb342862-542b-41c1-9312-62b667df8116', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 5, 'Frontend Testing with Jest', 'Write unit and integration tests for React components.', NULL, '2025-04-27 21:58:59'),
-('eee774f9-3776-4d0c-83dd-63d3db022d14', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 2, 'Docker Containerization', 'Containerize applications with Docker and write Dockerfiles.', NULL, '2025-04-27 21:58:59');
+('00e412f2-f0d0-4a8e-9e81-dd1324316afa', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 4, 'CI/CD with Jenkins', 'Build automated pipelines for test, build, and deploy.', '6ac62a35-aec7-459b-abe0-e33a199923b6', '2025-04-27 21:58:59'),
+('02227790-88e7-476b-a024-7cbbea2af4c8', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 2, 'Master Python Programming', 'Complete a comprehensive Python fundamentals course.', '2ca2cc8a-3493-428b-a721-0e58bb7cfd7d', '2025-04-27 21:58:59'),
+('0f92bfa6-1799-4e5e-b394-64d3ea146ed1', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 1, 'HTML & CSS Fundamentals', 'Learn semantic HTML and responsive CSS layouts.', '07abfa23-51a0-4e6e-9480-852c22f42805', '2025-04-27 21:58:59'),
+('1161ce63-6974-40a7-a58b-697df6e5345a', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 3, 'Kubernetes Orchestration', 'Deploy and manage containers at scale on Kubernetes.', '15a6f412-c73a-4169-9738-806364e4dabf', '2025-04-27 21:58:59'),
+('2358c538-a3e0-48af-9151-b488f8bdb7c1', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 3, 'Data Analysis with Pandas', 'Perform real-world data cleaning and exploratory analysis.', 'db30cdc9-52ba-4cc7-8e2e-9bdcc0960839', '2025-04-27 21:58:59'),
+('29d19b89-0aa7-4726-9baf-fa1cffacfb03', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 1, 'Linux & Bash Essentials', 'Gain proficiency with Linux command line and shell scripting.', 'e013b7b2-fc08-4a79-9cb6-53d2d7646b48', '2025-04-27 21:58:59'),
+('29ef7677-16ae-468e-84b3-1d0b0b737121', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 4, 'State Management with Redux', 'Manage complex app state using Redux patterns.', '538943a7-6800-4ed6-95f5-c72486ff6981', '2025-04-27 21:58:59'),
+('3c2bdff8-d48b-45be-bae6-a7da65cc71ec', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 2, 'Linux Security Basics', 'Harden Linux systems and understand permissions.', 'e013b7b2-fc08-4a79-9cb6-53d2d7646b48', '2025-04-27 21:58:59'),
+('4b49e0be-b6e0-4254-9867-c1fc93c691d3', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 1, 'Learn Python for Data Science', 'Cover NumPy, Pandas, and data manipulation basics.', 'df79aca5-5985-4547-ab53-12b46cb24c19', '2025-04-27 21:58:59'),
+('4c5aa5ca-6bab-459b-abdc-aa36f57ded21', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 2, 'JavaScript ES6+ Features', 'Understand modern JS syntax, promises, and async/await.', '132547ce-92ec-492c-bc87-5080feb26ef4', '2025-04-27 21:58:59'),
+('528d17f5-e209-4f41-bb72-8d470e6554d8', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 3, 'React.js Basics', 'Build component-based UIs with React and JSX.', 'f311b2f5-a539-45e1-9127-954148a4864d', '2025-04-27 21:58:59'),
+('55ea7c75-c618-41c7-baee-978454561b53', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 4, 'Machine Learning Fundamentals', 'Learn supervised & unsupervised algorithms with scikit-learn.', '27187f76-b668-4237-a245-5e39dda6d884', '2025-04-27 21:58:59'),
+('5dcfd264-5d20-40c2-99c3-646a7c76479d', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 5, 'Model Deployment with Flask', 'Wrap ML models into REST APIs using Flask or FastAPI.', '012846f7-2c68-42f0-a311-e5fe4b20220d', '2025-04-27 21:58:59'),
+('646c0bd1-cce3-48cb-ab19-d7cbb38dddff', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 5, 'Security Monitoring & SIEM', 'Set up log aggregation and alerts with a SIEM tool.', '31374796-6bc8-4755-9d03-9927af0e3956', '2025-04-27 21:58:59'),
+('7bcf9028-48ed-4019-b5f9-966910072b1d', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 1, 'Learn Data Structures & Algorithms', 'Master common data structures and algorithms in your language of choice.', 'e6113de0-feb5-4248-a31c-8b177f65f173', '2025-04-27 21:58:59'),
+('7be58ce9-56c1-4447-b8ce-affe6208c8df', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 4, 'Penetration Testing with Metasploit', 'Perform basic pentests using Metasploit Framework.', 'e53e8ea6-2859-4acc-85a8-99ea6b34e43e', '2025-04-27 21:58:59'),
+('846cec40-5407-482e-b97d-ed1a00076bc6', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 5, 'Implement CI/CD Pipelines', 'Set up continuous integration and delivery with Jenkins or GitHub Actions.', '6ac62a35-aec7-459b-abe0-e33a199923b6', '2025-04-27 21:58:59'),
+('b7dfc3c2-4554-49f3-acf2-4d8cbc3a28bf', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 4, 'Understand Database Systems', 'Learn SQL, schema design, and indexing strategies.', 'f2250f31-bc44-4987-a539-47e67debd778', '2025-04-27 21:58:59'),
+('b9906303-a0e2-417b-93d5-59b608a16bd4', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 3, 'OWASP Top 10 Vulnerabilities', 'Study and practice preventing the OWASP Top 10 web flaws.', 'e8885aea-f10f-40fb-93d2-287fccd54486', '2025-04-27 21:58:59'),
+('d8a668fa-901d-4e7c-b9a7-8071802083ab', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 5, 'Infrastructure as Code with Terraform', 'Provision and manage cloud resources using Terraform.', 'b70144e6-aca8-4df8-a57e-8ac8b8698feb', '2025-04-27 21:58:59'),
+('e3e8d14a-edb5-4448-8006-feba74fe1a9a', '1ff976d2-b5af-4585-9baf-f3f9bff3869c', 3, 'Build REST APIs with Flask', 'Develop and deploy RESTful APIs using Flask framework.', 'a5f15689-3fbc-4195-a07d-5b6ed95e3f96', '2025-04-27 21:58:59'),
+('e5cf6782-04ff-4485-b124-250b30bf0f0c', '8399ffcb-dfef-4f5f-9bb7-168dceab4841', 2, 'Statistics & Probability Basics', 'Understand descriptive stats, distributions, and hypothesis testing.', '742aba42-c415-43b7-872e-0002d8f80736', '2025-04-27 21:58:59'),
+('eafe2fbd-2a8f-4038-843b-b3cd0f62a298', '4a5ffc98-458b-4d7c-be77-ea0f345c0e33', 1, 'Networking Fundamentals', 'Learn OSI model, TCP/IP, and common network protocols.', '84cdcbda-53e5-44ed-b3ca-57a97964687b', '2025-04-27 21:58:59'),
+('eb342862-542b-41c1-9312-62b667df8116', 'ead65b8c-7cd3-4266-91c3-a2e6d1e5dac3', 5, 'Frontend Testing with Jest', 'Write unit and integration tests for React components.', 'e2fef3fa-03a7-492d-9273-d552adc1e20e', '2025-04-27 21:58:59'),
+('eee774f9-3776-4d0c-83dd-63d3db022d14', 'd0d0ed3e-a250-48a9-9cc8-9bf067231a21', 2, 'Docker Containerization', 'Containerize applications with Docker and write Dockerfiles.', '5a745adf-6a69-4143-af10-85226173e6f8', '2025-04-27 21:58:59');
 
 -- --------------------------------------------------------
 
