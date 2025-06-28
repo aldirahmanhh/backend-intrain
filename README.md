@@ -216,6 +216,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     "message":"Hello, my name is Admin, my current role is a Freelance BackEnd Engineer, and i have 2 years of experiences" (User chat input)
 }
 ```
+
 - Response (HR Bot will Response Every message):
 ```json
 {
@@ -227,6 +228,18 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
     "session_id": "2f372196-e2fb-49bc-a937-eb546abe554d"
 }
 ```
+
+- Response (If the answer out of context):
+```json
+{
+    "response": {
+        "feedback_text": "Jawaban Anda belum tepat, tolong fokus menjawab pertanyaan.",
+        "type": "feedback"
+    },
+    "session_id": "7886871c-e66a-4517-bfc1-fb68eed26b44"
+}
+```
+- If the user cannot answer 3x in in the same question then the chat sessions will automaticly ended by the system
 
 - Response (HR Bot will Ended the Chat with Evaluation):
 ```json
@@ -1448,6 +1461,7 @@ The API endpoints currently documented with the placeholder ```{base}``` point t
         "created_at": "2025-06-28T12:24:47",
         "expertise": "Data Science",
         "id": "3f055250-c9ad-4125-aa01-c3530b407707",
+        "name": "Administrator",
         "user_id": "4c87d980-7457-4df1-ba12-c152b948b762"
     },
     ...
@@ -1475,6 +1489,7 @@ For the "q" using full lowercase & use "_" as space
         "created_at": "2025-06-28T12:24:47",
         "expertise": "Data Science",
         "id": "3f055250-c9ad-4125-aa01-c3530b407707",
+        "name": "Administrator",
         "user_id": "4c87d980-7457-4df1-ba12-c152b948b762"
     },
     ... (List of Searcheable Mentors)
