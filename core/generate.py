@@ -49,7 +49,7 @@ def generate_response(contents):
     generated_text = ""
     try:
         for chunk in client.models.generate_content_stream(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=prompt_texts,
             config=config,
         ):
