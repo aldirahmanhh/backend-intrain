@@ -4,6 +4,7 @@ import dotenv
 import re
 import json
 import random
+import random as rd
 
 from flask import Flask, request, jsonify, abort
 from datetime import datetime
@@ -149,31 +150,30 @@ def chat():
     sid       = data.get('session_id')
     user_text = data.get('message')
 
-    # 1) INITIAL CALL: no session_id → create session & ask intro
+    # 1) INITIAL CALL: start session + intro question
     if not sid:
         uid   = data['user_id']
         hrid  = data['hr_level_id']
         job   = data['job_type']
-
-        # decide how many real questions (excluding intro)
-        low, high = {1:(3,5), 2:(5,7), 3:(7,10)}[HRLevel.query.get(hrid).difficulty_rank]
-        n_real    = random.randint(low, high)
+        lvl   = HRLevel.query.get(hrid)
+        low, high = {1:(3,5),2:(5,7),3:(7,10)}[lvl.difficulty_rank]
+        n_real = rd.randint(low, high)
 
         session = ChatSession(
-            user_id         = uid,
-            hr_level_id     = hrid,
-            job_type        = job,
-            total_questions = n_real + 1   # +1 for the intro question
+            id=str(uuid.uuid4()),
+            user_id=uid,
+            hr_level_id=hrid,
+            job_type=job,
+            total_questions=n_real+1
         )
         db.session.add(session)
         db.session.commit()
 
-        # send intro as question #1
         intro_q = {
             "type": "question",
             "question_number": 1,
             "question_text": (
-                "Perkenalkan diri Anda: nama Anda, peran saat ini, "
+                "Perkenalkan diri Anda: nama, peran saat ini, "
                 "dan berapa tahun pengalaman yang Anda miliki."
             )
         }
@@ -186,8 +186,8 @@ def chat():
 
         return jsonify({"session_id": session.id, "response": intro_q}), 200
 
-    # 2) Continue Chat: save answer, then either ask next or evaluate
-    session = ChatSession.query.get(sid)
+    # 2) CONTINUATION: save user answer
+    session = ChatSession.query.get(sid) or abort(404, "Session not found")
     db.session.add(ChatMessage(
         session_id=sid,
         sender='user',
@@ -195,71 +195,88 @@ def chat():
     ))
     db.session.commit()
 
-    # reconstruct history & track asked questions
+    # rebuild history & asked list
     history = ChatMessage.query.filter_by(session_id=sid).order_by(ChatMessage.sent_at).all()
-    asked   = []
-    for msg in history:
-        if msg.sender == 'bot':
+    asked = []
+    for m in history:
+        if m.sender=='bot':
             try:
-                blk = strip_json(msg.message)
+                blk = strip_json(m.message)
                 q   = json.loads(blk)
-                if q.get("type") == "question":
+                if q.get("type")=="question":
                     asked.append(q["question_number"])
             except:
                 pass
 
-    # If done with all questions → evaluate
+    # detect last question number (for constraints)
+    last_qnum = None
+    for m in reversed(history):
+        if m.sender=='bot':
+            try:
+                p = json.loads(strip_json(m.message))
+                if p.get("type")=="question":
+                    last_qnum = p["question_number"]
+                    break
+            except:
+                pass
+
+    # 3) If we've asked all questions, request evaluation
     if len(asked) >= session.total_questions:
-        # Build the AI prompt
         eval_prompt = (
-            "Anda adalah evaluator HR ahli. Sekarang setelah wawancara selesai, "
-            "tinjau SEMUA jawaban kandidat dan KELUARKAN HANYA JSON MENTAH "
-            "dalam format persis berikut (tanpa markdown, tanpa fences):\n\n"
+            "Anda adalah evaluator HR yang ahli. Wawancara selesai, "
+            "Tinjau SEMUA jawaban kandidat dan OUTPUT ONLY RAW JSON:\n\n"
             "{\n"
-            '  "score": <integer 1-10>,\n'
-            '  "recommendations": [\n'
-            '    "…",\n'
-            '    "…"\n'
-            '  ]\n'
+            '  "type": "end",\n'
+            '  "score": <angka 1–10>,\n'
+            '  "recommendations": ["…","…"]\n'
             "}\n"
         )
-   
-
-        # Assemble messages for Gemini
-        msgs = [{ "role": "system", "content": eval_prompt }]
+        msgs = [{"role":"system","content":eval_prompt}]
         for m in history:
             msgs.append({
-                "role": "user" if m.sender == 'user' else "model",
+                "role": "user" if m.sender=='user' else "model",
                 "content": m.message
             })
 
-        # call the AI
-        ai_out  = generate_response(msgs)
-        raw     = strip_json(ai_out)
-        result  = json.loads(raw)
+        ai_out = generate_response(msgs)
+        result = json.loads(strip_json(ai_out))
 
-        # Save the evaluation
-        rec = ChatEvaluation(
-            session_id      = session.id,
-            score           = result['score'],
-            recommendations = json.dumps(result['recommendations'])
-        )
-        db.session.add(rec)
-        db.session.commit()
+        # As soon as we get a type=end, wrap & persist
+        if result.get("type") == "end":
+            eval_id   = str(uuid.uuid4())
+            timestamp = datetime.utcnow().isoformat()
 
-        # Return the saved evaluation
-        return jsonify({
-            'session_id': session.id,
-            'evaluation': rec.to_dict()
-        }), 200
+            # save to DB
+            rec = ChatEvaluation(
+                id               = eval_id,
+                session_id       = sid,
+                score            = result["score"],
+                recommendations  = json.dumps(result["recommendations"]),
+                evaluated_at     = timestamp
+            )
+            db.session.add(rec)
+            db.session.commit()
 
-    # Else: ask next question
+            return jsonify({
+                "evaluation": {
+                    "id":               eval_id,
+                    "session_id":       sid,
+                    "score":            result["score"],
+                    "recommendations":  result["recommendations"],
+                    "evaluated_at":     timestamp
+                },
+                "session_id": sid
+            }), 200
+
+    # 4) Otherwise: ask next question (with constraints)
     lvl   = HRLevel.query.get(session.hr_level_id)
-    sys_p = build_system_prompt(lvl, session.job_type, asked)
-    msgs  = [{ "role": "system", "content": sys_p }]
+    first_q = (len(asked) == 0)
+    sys_p = build_system_prompt(lvl, session.job_type, asked, first_question_only=first_q)
+
+    msgs = [{"role":"system","content":sys_p}]
     for m in history:
         msgs.append({
-            "role": "user" if m.sender=="user" else "model",
+            "role": "user" if m.sender=='user' else "model",
             "content": m.message
         })
 
@@ -267,6 +284,33 @@ def chat():
     clean = strip_json(out)
     question = json.loads(clean)
 
+    # If Gemini itself says "type":"end" here (e.g. on Q1 fails), handle it
+    if question.get("type") == "end":
+        eval_id   = str(uuid.uuid4())
+        timestamp = datetime.utcnow().isoformat()
+
+        rec = ChatEvaluation(
+            id               = eval_id,
+            session_id       = sid,
+            score            = question["score"],
+            recommendations  = json.dumps(question["recommendations"]),
+            evaluated_at     = timestamp
+        )
+        db.session.add(rec)
+        db.session.commit()
+
+        return jsonify({
+            "evaluation": {
+                "id":               eval_id,
+                "session_id":       sid,
+                "score":            question["score"],
+                "recommendations":  question["recommendations"],
+                "evaluated_at":     timestamp
+            },
+            "session_id": sid
+        }), 200
+
+    # Normal question flow
     db.session.add(ChatMessage(
         session_id=sid,
         sender='bot',
@@ -275,59 +319,6 @@ def chat():
     db.session.commit()
 
     return jsonify({"session_id": sid, "response": question}), 200
-
-# Chat History
-@app.route('/api/v1/feature/interview/chat/history/<user_id>', methods=['GET'])
-def list_user_chats(user_id):
-    """
-    Returns all chat sessions for a given user, ordered by most recent activity.
-    """
-    # Fetch all sessions for this user
-    sessions = (
-        ChatSession
-        .query
-        .filter_by(user_id=user_id)
-        .order_by(ChatSession.started_at.desc())
-        .all()
-    )
-
-    chats = []
-    for s in sessions:
-        # Get the latest message in the session
-        last_msg = (
-            ChatMessage
-            .query
-            .filter_by(session_id=s.id)
-            .order_by(ChatMessage.sent_at.desc())
-            .first()
-        )
-
-        if last_msg:
-            content = last_msg.message
-            if last_msg.sender == 'bot':
-                try:
-                    # Strip any ``` fences and parse JSON
-                    blob = json.loads(re.sub(r'```(?:json)?', '', content))
-                    snippet = blob.get('question_text') or blob.get('answer_text') or content
-                except:
-                    snippet = content
-            else:
-                snippet = content
-
-            last_seen = last_msg.sent_at.isoformat()
-        else:
-            snippet, last_seen = None, None
-
-        chats.append({
-            'session_id':      s.id,
-            'job_type':        s.job_type,
-            'hr_level_id':     s.hr_level_id,
-            'started_at':      s.started_at.isoformat(),
-            'last_message':    snippet,
-            'last_message_at': last_seen
-        })
-
-    return jsonify({'user_id': user_id, 'chats': chats}), 200
 
 # Chat Sessions History
 @app.route('/api/v1/feature/interview/chat/<session_id>/history', methods=['GET'])
@@ -795,27 +786,42 @@ def list_achievements(user_id):
 def register_mentor():
     data = request.get_json() or {}
     user = User.query.get(data.get('user_id')) or abort(404, 'User not found')
-    if user.is_mentor:
-        return jsonify({'error':'Already a mentor'}), 400
+    if getattr(user, 'is_mentor', False):
+        return jsonify({'error': 'Already a mentor'}), 400
+
     profile = MentorProfile(
         id=str(uuid.uuid4()),
         user_id=user.id,
-        expertise=data.get('expertise',''),
-        bio=data.get('bio','')
+        expertise=data.get('expertise', ''),
+        bio=data.get('bio', '')
     )
     user.is_mentor = True
+
     db.session.add(profile)
     db.session.commit()
+
     return jsonify(profile.to_dict()), 201
 
-# 2. Search/List mentors
+
+# 2. Search/List mentors (including mentor name)
 @app.route('/api/v1/mentorship/mentors', methods=['GET'])
 def list_mentors():
-    q = request.args.get('q','')
-    mentors = MentorProfile.query.filter(MentorProfile.expertise.ilike(f'%{q}%')).all()
-    return jsonify([m.to_dict() for m in mentors]), 200
+    q = request.args.get('q', '')
+    mentors = MentorProfile.query \
+        .filter(MentorProfile.expertise.ilike(f'%{q}%')) \
+        .all()
 
-# 3. Set availability
+    output = []
+    for m in mentors:
+        user = User.query.get(m.user_id)
+        mp = m.to_dict()
+        mp['name'] = user.name if user else None
+        output.append(mp)
+
+    return jsonify(output), 200
+
+
+# 3. Set availability for a mentor
 @app.route('/api/v1/mentorship/mentors/<mentor_id>/availability', methods=['POST'])
 def set_availability(mentor_id):
     mentor = MentorProfile.query.get(mentor_id) or abort(404, 'Mentor not found')
@@ -830,18 +836,25 @@ def set_availability(mentor_id):
     db.session.commit()
     return jsonify(avail.to_dict()), 201
 
-# 4. Get availability
+
+# 4. Get availability for a mentor
 @app.route('/api/v1/mentorship/mentors/<mentor_id>/availability', methods=['GET'])
 def get_availability(mentor_id):
+    MentorProfile.query.get_or_404(mentor_id, description='Mentor not found')
     avails = MentorAvailability.query.filter_by(mentor_id=mentor_id).all()
     return jsonify([a.to_dict() for a in avails]), 200
 
-# 5. Book session
+
+# 5. Book a mentoring session
 @app.route('/api/v1/mentorship/sessions', methods=['POST'])
 def book_session():
     data = request.get_json() or {}
-    avail = MentorAvailability.query.get(data.get('availability_id')) or abort(404, 'Slot not found')
-    meet_link = f"https://meet.google.com/{''.join(random.choices('abcdefghijklmnopqrstuvwxyz',k=10))}"
+    avail = MentorAvailability.query.get(data.get('availability_id')) or abort(404, 'Availability slot not found')
+
+    # generate dummy Google Meet link
+    link_code = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=10))
+    meet_link = f"https://meet.google.com/{link_code}"
+
     sess = MentorshipSession(
         id=str(uuid.uuid4()),
         mentee_id=data.get('mentee_id'),
@@ -849,77 +862,74 @@ def book_session():
         scheduled_at=avail.start_datetime,
         meet_link=meet_link
     )
+    # remove availability slot once booked
     db.session.add(sess)
-    db.session.delete(avail)  # block slot
+    db.session.delete(avail)
     db.session.commit()
+
     return jsonify(sess.to_dict()), 201
 
-# 6. Submit feedback
+
+# 6. Submit feedback after session
 @app.route('/api/v1/mentorship/sessions/<session_id>/feedback', methods=['POST'])
 def submit_feedback(session_id):
     sess = MentorshipSession.query.get(session_id) or abort(404, 'Session not found')
-    if sess.feedback:
-        return jsonify({'error':'Feedback already submitted'}), 400
+    if getattr(sess, 'feedback', None):
+        return jsonify({'error': 'Feedback already submitted'}), 400
+
     data = request.get_json() or {}
     fb = MentorshipFeedback(
         id=str(uuid.uuid4()),
         session_id=sess.id,
         rating=data.get('rating'),
-        feedback=data.get('feedback','')
+        feedback=data.get('feedback', '')
     )
     sess.completed = True
+
     db.session.add(fb)
     db.session.commit()
+
     return jsonify(fb.to_dict()), 201
 
+
+# 7. Get a single mentor’s full profile (with work experiences)
 @app.route('/api/v1/mentorship/mentors/<mentor_id>/profile', methods=['GET'])
 def get_mentor_profile(mentor_id):
-    # 1) Load the mentor profile
-    profile = MentorProfile.query.get(mentor_id)
-    if not profile:
-        abort(404, description='Mentor not found')
+    profile = MentorProfile.query.get(mentor_id) or abort(404, 'Mentor not found')
+    user = User.query.get(profile.user_id) or abort(404, 'User not found')
 
-    # 2) Load the underlying user
-    user = User.query.get(profile.user_id)
-    if not user:
-        abort(404, description='User not found')
-
-    # 3) Load all work experiences for that mentor's user
-    experiences = (
-        WorkExperience.query
-        .filter_by(user_id=profile.user_id)
-        .order_by(WorkExperience.start_year.desc(), WorkExperience.start_month.desc())
+    exps = WorkExperience.query \
+        .filter_by(user_id=profile.user_id) \
+        .order_by(WorkExperience.start_year.desc(), WorkExperience.start_month.desc()) \
         .all()
-    )
 
-    # 4) Build pared-down list of experiences
     work_list = []
-    for exp in experiences:
+    for e in exps:
         work_list.append({
-            'id':           exp.id,
-            'job_title':    exp.job_title,
-            'company_name': exp.company_name,
-            'job_desc':     exp.job_desc,
-            'start_month':  exp.start_month,
-            'start_year':   exp.start_year,
-            'end_month':    exp.end_month,
-            'end_year':     exp.end_year,
-            'is_current':   exp.is_current
+            'id':           e.id,
+            'job_title':    e.job_title,
+            'company_name': e.company_name,
+            'job_desc':     e.job_desc,
+            'start_month':  e.start_month,
+            'start_year':   e.start_year,
+            'end_month':    e.end_month,
+            'end_year':     e.end_year,
+            'is_current':   bool(e.is_current),
         })
 
-    # 5) Build response including user name
     resp = {
         'mentor_profile': {
-            'id':          profile.id,
-            'user_id':     profile.user_id,
-            'name':        user.name,         # <-- include name here
-            'expertise':   profile.expertise,
-            'bio':         profile.bio,
-            'created_at':  profile.created_at.isoformat()
+            'id':         profile.id,
+            'user_id':    profile.user_id,
+            'name':       user.name,
+            'expertise':  profile.expertise,
+            'bio':        profile.bio,
+            'created_at': profile.created_at.isoformat()
         },
         'work_experiences': work_list
     }
     return jsonify(resp), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
