@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 20, 2025 at 07:29 PM
+-- Generation Time: Jun 28, 2025 at 06:58 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -98,29 +98,44 @@ CREATE TABLE `courses` (
 
 INSERT INTO `courses` (`id`, `title`, `description`, `provider`, `url`, `created_at`) VALUES
 ('072eb182-07ca-41e1-a40b-f5cc3a2f4360', 'Blockchain Basics', 'Description for Blockchain Basics.', 'Udemy', 'https://example.com/blockchain-basics', '2025-04-27 13:28:37'),
+('07abfa23-51a0-4e6e-9480-852c22f42805', 'HTML & CSS Fundamentals', 'Learn semantic HTML5 and modern CSS layouts.', 'Udemy', 'https://example.com/html-css', '2025-06-28 11:56:17'),
 ('0b46be53-1298-4333-9706-efa3c607876b', 'AWS Certified Solutions Architect', 'Description for AWS Certified Solutions Architect.', 'Udemy', 'https://example.com/aws-certified-solutions-architect', '2025-04-27 13:28:37'),
+('132547ce-92ec-492c-bc87-5080feb26ef4', 'Modern JavaScript ES6+', 'Deep dive into ES6+ features: modules, promises, async/await.', 'Udemy', 'https://example.com/js-es6', '2025-06-28 11:56:17'),
+('15a6f412-c73a-4169-9738-806364e4dabf', 'Kubernetes Hands-On', 'Deploy, scale and manage containerized apps on Kubernetes.', 'Udemy', 'https://example.com/k8s-hands-on', '2025-06-28 11:56:17'),
 ('1a8f278f-e357-4104-8b04-80926c4cba0f', 'Ethical Hacking and Penetration Testing', 'Description for Ethical Hacking and Penetration Testing.', 'Udemy', 'https://example.com/ethical-hacking-and-penetration-testing', '2025-04-27 13:28:37'),
 ('1f1778b8-f96b-4fa7-8362-9b19ab82d435', 'Docker and Kubernetes Fundamentals', 'Description for Docker and Kubernetes Fundamentals.', 'Udemy', 'https://example.com/docker-and-kubernetes-fundamentals', '2025-04-27 13:28:37'),
+('27187f76-b668-4237-a245-5e39dda6d884', 'Machine Learning A-Z™: Hands-On', 'Practical ML algorithms with scikit-learn and Python.', 'Udemy', 'https://example.com/ml-az', '2025-06-28 11:56:17'),
 ('2acd6e54-e8b1-4c25-b860-65879cb71e4f', 'DevOps with Jenkins and Terraform', 'Description for DevOps with Jenkins and Terraform.', 'Udemy', 'https://example.com/devops-with-jenkins-and-terraform', '2025-04-27 13:28:37'),
 ('3d6c0a3b-e9ae-43bc-ae39-47b1eb3e1f1a', 'Web Security Fundamentals', 'Description for Web Security Fundamentals.', 'Udemy', 'https://example.com/web-security-fundamentals', '2025-04-27 13:28:37'),
 ('3e691e6a-d53e-4dd8-ad53-876fafb89019', 'C# Programming Fundamentals', 'Description for C# Programming Fundamentals.', 'Udemy', 'https://example.com/c#-programming-fundamentals', '2025-04-27 13:28:37'),
 ('465454ec-a2ee-4d14-a8c3-cb23ea6aba85', 'Advanced Java Programming', 'Description for Advanced Java Programming.', 'Udemy', 'https://example.com/advanced-java-programming', '2025-04-27 13:28:37'),
 ('536938c3-ffee-4001-a515-0f64a36bc79a', 'Graphic Design with Photoshop', 'Description for Graphic Design with Photoshop.', 'Udemy', 'https://example.com/graphic-design-with-photoshop', '2025-04-27 13:28:37'),
+('538943a7-6800-4ed6-95f5-c72486ff6981', 'Redux for State Management', 'Manage complex application state with Redux patterns.', 'Udemy', 'https://example.com/redux-patterns', '2025-06-28 11:56:17'),
+('5a745adf-6a69-4143-af10-85226173e6f8', 'Docker Mastery', 'Containerize applications and write Dockerfile best practices.', 'Udemy', 'https://example.com/docker-mastery', '2025-06-28 11:56:17'),
 ('65210dc7-a73b-4a14-b3a0-18ea5d10d872', 'Introduction to Java', 'Description for Introduction to Java.', 'Udemy', 'https://example.com/introduction-to-java', '2025-04-27 13:28:37'),
+('6ac62a35-aec7-459b-abe0-e33a199923b6', 'CI/CD with GitHub Actions', 'Automate builds, tests and deployments with GitHub Actions.', 'Udemy', 'https://example.com/github-actions', '2025-06-28 11:56:17'),
+('742aba42-c415-43b7-872e-0002d8f80736', 'Statistics & Probability for Data Science', 'Foundations of statistics, distributions, hypothesis testing.', 'Coursera', 'https://example.com/stats-ds', '2025-06-28 11:56:17'),
 ('84cdcbda-53e5-44ed-b3ca-57a97964687b', 'Network Administration Fundamentals', 'Description for Network Administration Fundamentals.', 'Udemy', 'https://example.com/network-administration-fundamentals', '2025-04-27 13:28:37'),
 ('8a8c64fb-d2bf-4962-be4f-3a289db93989', 'Business Analytics with Power BI', 'Description for Business Analytics with Power BI.', 'Udemy', 'https://example.com/business-analytics-with-power-bi', '2025-04-27 13:28:37'),
 ('98059442-a2ff-48b8-862b-d3ae7729dbab', 'NoSQL Database Design', 'Description for NoSQL Database Design.', 'Udemy', 'https://example.com/nosql-database-design', '2025-04-27 13:28:37'),
 ('a252bc63-f180-4bf8-aef1-fe3e52e934ec', 'Android App Development with Kotlin', 'Description for Android App Development with Kotlin.', 'Udemy', 'https://example.com/android-app-development-with-kotlin', '2025-04-27 13:28:37'),
+('a5f15689-3fbc-4195-a07d-5b6ed95e3f96', 'REST APIs with Flask', 'Build and deploy RESTful services using Flask and Python.', 'Udemy', 'https://example.com/flask-apis', '2025-06-28 11:56:17'),
 ('a84ccbd2-3ad3-4ba9-b9b6-40f6457eaf86', 'Cybersecurity for Beginners', 'Description for Cybersecurity for Beginners.', 'Udemy', 'https://example.com/cybersecurity-for-beginners', '2025-04-27 13:28:37'),
 ('b13ba382-eecb-4950-a114-8026a9d37723', 'SEO and SEM Strategies', 'Description for SEO and SEM Strategies.', 'Udemy', 'https://example.com/seo-and-sem-strategies', '2025-04-27 13:28:37'),
+('b70144e6-aca8-4df8-a57e-8ac8b8698feb', 'Terraform: Infrastructure as Code', 'Provision and manage infrastructure with Terraform.', 'Udemy', 'https://example.com/terraform-iac', '2025-06-28 11:56:17'),
 ('bcd50e42-6173-424c-9d95-89f18c0454b0', 'Digital Marketing Essentials', 'Description for Digital Marketing Essentials.', 'Udemy', 'https://example.com/digital-marketing-essentials', '2025-04-27 13:28:37'),
 ('e013b7b2-fc08-4a79-9cb6-53d2d7646b48', 'Linux System Administration', 'Description for Linux System Administration.', 'Udemy', 'https://example.com/linux-system-administration', '2025-04-27 13:28:37'),
 ('e03e4906-f7b7-49dc-9525-47c4eb58f78b', 'Mobile App Development with Flutter', 'Description for Mobile App Development with Flutter.', 'Udemy', 'https://example.com/mobile-app-development-with-flutter', '2025-04-27 13:28:37'),
+('e2fef3fa-03a7-492d-9273-d552adc1e20e', 'Testing React with Jest', 'Write unit and integration tests for React components using Jest.', 'Udemy', 'https://example.com/jest-react', '2025-06-28 11:56:17'),
 ('e35a8bc2-378c-4c4e-a8fa-73f653336f86', 'Cloud Computing Basics', 'Description for Cloud Computing Basics.', 'Udemy', 'https://example.com/cloud-computing-basics', '2025-04-27 13:28:37'),
 ('e4a36b86-8e72-430e-95b9-099eba63786b', '.NET Core Development', 'Description for .NET Core Development.', 'Udemy', 'https://example.com/.net-core-development', '2025-04-27 13:28:37'),
+('e53e8ea6-2859-4acc-85a8-99ea6b34e43e', 'Metasploit for Pentesters', 'Learn pentesting with Metasploit Framework.', 'Udemy', 'https://example.com/metasploit', '2025-06-28 11:56:17'),
+('e6113de0-feb5-4248-a31c-8b177f65f173', 'Data Structures & Algorithms in Python', 'Deep dive on arrays, linked lists, trees, graphs, sorting and searching in Python.', 'Udemy', 'https://example.com/dsa-python', '2025-06-28 11:56:17'),
+('e8885aea-f10f-40fb-93d2-287fccd54486', 'OWASP Top 10 Hands-On', 'Practical exercises for the OWASP Top 10 web vulnerabilities.', 'Udemy', 'https://example.com/owasp-top10', '2025-06-28 11:56:17'),
 ('f10d3ad8-13ac-48de-b762-8ebbf740a6ac', 'iOS App Development with Swift', 'Description for iOS App Development with Swift.', 'Udemy', 'https://example.com/ios-app-development-with-swift', '2025-04-27 13:28:37'),
 ('f2250f31-bc44-4987-a539-47e67debd778', 'Introduction to SQL and Databases', 'Description for Introduction to SQL and Databases.', 'Udemy', 'https://example.com/introduction-to-sql-and-databases', '2025-04-27 13:28:37'),
 ('f27739f8-f621-4c10-b659-54afd26101e0', 'UI/UX Design Principles', 'Description for UI/UX Design Principles.', 'Udemy', 'https://example.com/ui/ux-design-principles', '2025-04-27 13:28:37'),
+('f311b2f5-a539-45e1-9127-954148a4864d', 'React.js Basics', 'Build component-based UIs with React and JSX.', 'Udemy', 'https://example.com/react-basics', '2025-06-28 11:56:17'),
 ('fd04598f-e347-49a0-8c57-93500853eb3f', 'Data Analysis with Excel', 'Description for Data Analysis with Excel.', 'Udemy', 'https://example.com/data-analysis-with-excel', '2025-04-27 13:28:37');
 
 -- --------------------------------------------------------
