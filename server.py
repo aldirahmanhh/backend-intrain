@@ -320,6 +320,59 @@ def chat():
 
     return jsonify({"session_id": sid, "response": question}), 200
 
+# Chat History
+@app.route('/api/v1/feature/interview/chat/history/<user_id>', methods=['GET'])
+def list_user_chats(user_id):
+    """
+    Returns all chat sessions for a given user, ordered by most recent activity.
+    """
+    # 1) fetch all sessions for this user
+    sessions = (
+        ChatSession
+        .query
+        .filter_by(user_id=user_id)
+        .order_by(ChatSession.started_at.desc())
+        .all()
+    )
+
+    chats = []
+    for s in sessions:
+        # 2) get the latest message in the session
+        last_msg = (
+            ChatMessage
+            .query
+            .filter_by(session_id=s.id)
+            .order_by(ChatMessage.sent_at.desc())
+            .first()
+        )
+
+        if last_msg:
+            content = last_msg.message
+            if last_msg.sender == 'bot':
+                try:
+                    # strip any ``` fences and parse JSON
+                    blob = json.loads(re.sub(r'```(?:json)?', '', content))
+                    snippet = blob.get('question_text') or blob.get('answer_text') or content
+                except:
+                    snippet = content
+            else:
+                snippet = content
+
+            last_seen = last_msg.sent_at.isoformat()
+        else:
+            snippet, last_seen = None, None
+
+        chats.append({
+            'session_id':      s.id,
+            'job_type':        s.job_type,
+            'hr_level_id':     s.hr_level_id,
+            'started_at':      s.started_at.isoformat(),
+            'last_message':    snippet,
+            'last_message_at': last_seen
+        })
+
+    return jsonify({'user_id': user_id, 'chats': chats}), 200
+
 # Chat Sessions History
 @app.route('/api/v1/feature/interview/chat/<session_id>/history', methods=['GET'])
 def get_history(session_id):
