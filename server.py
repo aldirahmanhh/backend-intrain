@@ -66,6 +66,58 @@ def index():
 def health_check():
     return jsonify({'status': 'ok'}), 200
 
+# Info Endpoint
+@app.route('/api/v1/info', methods=['GET'])
+def api_info():
+    base_url = request.host_url.rstrip('/')
+    endpoints = [
+        {'name': 'Root', 'url': f'{base_url}/'},
+        {'name': 'Health Check', 'url': f'{base_url}/api/v1/health'},
+        {'name': 'Info', 'url': f'{base_url}/api/v1/info'},
+        {'name': 'User Register', 'url': f'{base_url}/api/v1/auth/user/register'},
+        {'name': 'User Login', 'url': f'{base_url}/api/v1/auth/user/login'},
+        {'name': 'User Update', 'url': f'{base_url}/api/v1/auth/user/update'},
+        {'name': 'List HR Levels', 'url': f'{base_url}/api/v1/feature/chat/hr_levels'},
+        {'name': 'HR Chatbot', 'url': f'{base_url}/api/v1/feature/interview/chat'},
+        {'name': 'HR Chat History (by user)', 'url': f'{base_url}/api/v1/feature/interview/chat/history/<user_id>'},
+        {'name': 'HR Chat History (by session)', 'url': f'{base_url}/api/v1/feature/interview/chat/<session_id>/history'},
+        {'name': 'CV Upload', 'url': f'{base_url}/api/v1/feature/cv/upload'},
+        {'name': 'CV Review History (by user)', 'url': f'{base_url}/api/v1/feature/cv/history/user/<user_id>/reviews'},
+        {'name': 'CV History (by submission)', 'url': f'{base_url}/api/v1/feature/cv/history/<submission_id>'},
+        {'name': 'CV History (by user)', 'url': f'{base_url}/api/v1/feature/cv/history/user/<user_id>'},
+        {'name': 'List Courses', 'url': f'{base_url}/api/v1/feature/courses'},
+        {'name': 'Get Course', 'url': f'{base_url}/api/v1/feature/courses/<course_id>'},
+        {'name': 'Enroll Course', 'url': f'{base_url}/api/v1/feature/courses/enroll'},
+        {'name': 'Unenroll Course', 'url': f'{base_url}/api/v1/feature/courses/unenroll'},
+        {'name': 'Complete Course', 'url': f'{base_url}/api/v1/feature/courses/complete'},
+        {'name': 'List User Enrollments', 'url': f'{base_url}/api/v1/feature/courses/user/<user_id>/enrollments'},
+        {'name': 'List Work Experiences', 'url': f'{base_url}/api/v1/users/<user_id>/work_experiences'},
+        {'name': 'Get Work Experience', 'url': f'{base_url}/api/v1/users/<user_id>/work_experiences/<exp_id>'},
+        {'name': 'Create Work Experience', 'url': f'{base_url}/api/v1/users/<user_id>/work_experiences'},
+        {'name': 'Update Work Experience', 'url': f'{base_url}/api/v1/users/<user_id>/work_experiences/<exp_id>'},
+        {'name': 'Delete Work Experience', 'url': f'{base_url}/api/v1/users/<user_id>/work_experiences/<exp_id>'},
+        {'name': 'List Jobs', 'url': f'{base_url}/api/v1/jobs'},
+        {'name': 'List Roadmaps', 'url': f'{base_url}/api/v1/roadmaps'},
+        {'name': 'Get Roadmap', 'url': f'{base_url}/api/v1/roadmaps/<roadmap_id>'},
+        {'name': 'Start Roadmap', 'url': f'{base_url}/api/v1/users/<user_id>/roadmaps/<roadmap_id>/start'},
+        {'name': 'List User Roadmaps', 'url': f'{base_url}/api/v1/users/<user_id>/roadmaps'},
+        {'name': 'Delete User Roadmap', 'url': f'{base_url}/api/v1/users/<user_id>/roadmaps/<roadmap_id>'},
+        {'name': 'User Roadmap Progress', 'url': f'{base_url}/api/v1/users/<user_id>/roadmaps/<roadmap_id>/progress'},
+        {'name': 'Complete Roadmap Step', 'url': f'{base_url}/api/v1/users/<user_id>/roadmaps/<roadmap_id>/steps/<step_id>/complete'},
+        {'name': 'List Achievements', 'url': f'{base_url}/api/v1/users/<user_id>/achievements'},
+        {'name': 'Register Mentor', 'url': f'{base_url}/api/v1/mentorship/register'},
+        {'name': 'List Mentors', 'url': f'{base_url}/api/v1/mentorship/mentors'},
+        {'name': 'Set Mentor Availability', 'url': f'{base_url}/api/v1/mentorship/mentors/<mentor_id>/availability'},
+        {'name': 'Get Mentor Availability', 'url': f'{base_url}/api/v1/mentorship/mentors/<mentor_id>/availability'},
+        {'name': 'Book Mentorship Session', 'url': f'{base_url}/api/v1/mentorship/sessions'},
+        {'name': 'Submit Session Feedback', 'url': f'{base_url}/api/v1/mentorship/sessions/<session_id>/feedback'},
+        {'name': 'Get Mentor Profile', 'url': f'{base_url}/api/v1/mentorship/mentors/<mentor_id>/profile'},
+    ]
+    return jsonify({
+        'base_url': base_url,
+        'endpoints': endpoints
+    })
+
 # -------------------- User Data Endpoints --------------------
 
 # User Registration
@@ -945,7 +997,7 @@ def submit_feedback(session_id):
     return jsonify(fb.to_dict()), 201
 
 
-# 7. Get a single mentor’s full profile (with work experiences)
+# 7. Get a single mentor's full profile (with work experiences)
 @app.route('/api/v1/mentorship/mentors/<mentor_id>/profile', methods=['GET'])
 def get_mentor_profile(mentor_id):
     profile = MentorProfile.query.get(mentor_id) or abort(404, 'Mentor not found')
