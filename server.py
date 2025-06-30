@@ -59,7 +59,33 @@ def serialize(obj):
 # Root Endpoint
 @app.route('/')
 def index():
-    return "Server is Online!"
+    return '''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Intrain Backend API</title>
+        <style>
+            body { font-family: Arial, sans-serif; background: #f8f9fa; color: #222; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 60px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 32px; }
+            h1 { color: #007bff; }
+            a { color: #007bff; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Intrain Backend API</h1>
+            <p>Welcome to the backend API for Intrain. This service powers the HR chatbot, course management, CV analysis, and more.</p>
+            <p>For a list of available API endpoints, visit:<br>
+                <a href="/api/v1/info">/api/v1/info</a>
+            </p>
+            <p><small>&copy; 2024 Intrain</small></p>
+        </div>
+    </body>
+    </html>
+    '''
 
 # Health Check Endpoint
 @app.route('/api/v1/health', methods=['GET'])
