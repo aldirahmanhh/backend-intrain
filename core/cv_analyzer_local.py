@@ -3,49 +3,34 @@ import uuid
 import json
 import re
 import PyPDF2
-import tempfile
-
 from werkzeug.utils import secure_filename
 from core.generate import generate_response
 from core.models import CVSubmission
 from core.db import db
 
-# Writable temp directory
-UPLOAD_DIR = os.path.join(tempfile.gettempdir(), 'uploads')
-
+UPLOAD_DIR  = os.getenv('UPLOAD_DIR', 'uploads')
+ALLOWED_EXT = {'pdf', 'png', 'jpg', 'jpeg'}
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# Allowed file extensions
-ALLOWED_EXT = {'pdf', 'doc', 'docx', 'jpeg', 'jpg', 'png'}
-
 def save_submission_file(file_storage, user_id):
-    """
-    Saves an uploaded CV file into UPLOAD_DIR and
-    returns the newly created CVSubmission record.
-    """
-    # Sanitize filename and extract extension
     filename = secure_filename(file_storage.filename)
     ext = filename.rsplit('.', 1)[-1].lower()
     if ext not in ALLOWED_EXT:
         raise ValueError(f"File type .{ext} not supported.")
-
-    # Build a unique filename and save
-    unique_name = f"{uuid.uuid4().hex}.{ext}"
+    unique_name = f"{uuid.uuid4()}.{ext}"
     path = os.path.join(UPLOAD_DIR, unique_name)
     file_storage.save(path)
 
-    # Persist to database
     sub = CVSubmission(
         id=str(uuid.uuid4()),
         user_id=user_id,
         file_name=filename,
         file_type=ext,
-        file_url=path,
+        file_url=path
     )
     db.session.add(sub)
     db.session.commit()
     return sub
-
 
 def extract_text_from_cv(filepath):
     ext = filepath.rsplit('.', 1)[-1].lower()
