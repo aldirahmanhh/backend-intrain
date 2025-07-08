@@ -5,6 +5,9 @@ import re
 import json
 import random
 import random as rd
+import sqlalchemy
+import pymysql
+import certifi
 
 from flask import Flask, request, jsonify, abort
 from datetime import datetime
@@ -23,10 +26,31 @@ dotenv.load_dotenv()
 
 app = Flask(__name__)
 
-# Database configuration
-DATABASE_URL = os.getenv('DATABASE_URL')
+host     = os.getenv('AZURE_MYSQL_HOST')
+port     = os.getenv('AZURE_MYSQL_PORT', '3306')
+user     = os.getenv('AZURE_MYSQL_USER')
+password = os.getenv('AZURE_MYSQL_PASS')
+db_name  = os.getenv('AZURE_MYSQL_DB')
+
+DATABASE_URL = (
+    f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
+    "?charset=utf8mb4"
+)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Engine options untuk SSL
+app.config['SQLALCHEMY_DATABASE_URI']        = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS']      = {
+    'connect_args': {
+        'ssl': {
+            # pakai CA bundle dari certifi
+            'ca': certifi.where()
+        }
+    }
+}
 
 # Initialize SQLAlchemy
 from core.db import db
@@ -985,4 +1009,5 @@ def get_mentor_profile(mentor_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=False)

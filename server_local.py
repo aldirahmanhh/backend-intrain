@@ -5,13 +5,9 @@ import re
 import json
 import random
 import random as rd
-import sqlalchemy
-import pymysql
-import certifi
 
 from flask import Flask, request, jsonify, abort
 from datetime import datetime
-
 
 from core.chat import strip_json, build_system_prompt
 from core.generate import generate_response
@@ -27,31 +23,10 @@ dotenv.load_dotenv()
 
 app = Flask(__name__)
 
-host     = os.getenv('AZURE_MYSQL_HOST')
-port     = os.getenv('AZURE_MYSQL_PORT', '3306')
-user     = os.getenv('AZURE_MYSQL_USER')
-password = os.getenv('AZURE_MYSQL_PASS')
-db_name  = os.getenv('AZURE_MYSQL_DB')
-
-DATABASE_URL = (
-    f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
-    "?charset=utf8mb4"
-)
-
+# Database configuration
+DATABASE_URL = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Engine options untuk SSL
-app.config['SQLALCHEMY_DATABASE_URI']        = DATABASE_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS']      = {
-    'connect_args': {
-        'ssl': {
-            # pakai CA bundle dari certifi
-            'ca': certifi.where()
-        }
-    }
-}
 
 # Initialize SQLAlchemy
 from core.db import db
