@@ -20,6 +20,7 @@ from core.course_enroll import (
     enroll_course, unenroll_course,
     complete_course, list_user_enrollments
 )
+from core.speech import transcribe_mp3_file, synthesize_to_mp3
 from werkzeug.security import generate_password_hash
 
 dotenv.load_dotenv()
@@ -1007,6 +1008,266 @@ def get_mentor_profile(mentor_id):
     }
     return jsonify(resp), 200
 
+## HR Voice Interview API
+def handle_text_chat(sid, user_text, extras):
+    """
+    Run your existing text-based chat logic.
+    extras: dict from request.form for initial user_id, hr_level_id, job_type.
+    Returns (new_sid, ai_text, is_end, eval_payload_or_None).
+    """
+    # 1) INITIAL CALL
+    if not sid:
+        uid  = extras['user_id']
+        hrid = extras['hr_level_id']
+        job  = extras['job_type']
+        lvl  = HRLevel.query.get(hrid)
+        low, high = {1:(3,5),2:(5,7),3:(7,10)}[lvl.difficulty_rank]
+        import random
+        n_real = random.randint(low, high)
+
+        session = ChatSession(
+            id=str(uuid.uuid4()),
+            user_id=uid,
+            hr_level_id=hrid,
+            job_type=job,
+            total_questions=n_real+1
+        )
+        db.session.add(session); db.session.commit()
+
+        # Respond with intro question
+        intro_q = {
+            "type": "question",
+            "question_number": 1,
+            "question_text": (
+                "Perkenalkan diri Anda: nama, peran saat ini, "
+                "dan berapa tahun pengalaman yang Anda miliki."
+            )
+        }
+        db.session.add(ChatMessage(
+            session_id=session.id,
+            sender='bot',
+            message=json.dumps(intro_q)
+        ))
+        db.session.commit()
+
+        return session.id, None, False, {"response": intro_q}
+
+    # 2) Save user text answer
+    session = ChatSession.query.get(sid) or abort(404, "Session not found")
+    db.session.add(ChatMessage(
+        session_id=sid,
+        sender='user',
+        message=user_text
+    )); db.session.commit()
+
+    # 3) Reconstruct history & asked
+    history = ChatMessage.query.filter_by(session_id=sid).order_by(ChatMessage.sent_at).all()
+    asked = []
+    for m in history:
+        if m.sender=='bot':
+            try:
+                p = json.loads(strip_json(m.message))
+                if p['type']=='question':
+                    asked.append(p['question_number'])
+            except:
+                pass
+
+    # 4) If done, evaluate
+    if len(asked) >= session.total_questions:
+        eval_prompt = (
+            "Anda adalah evaluator HR ahli. Wawancara selesai, OUTPUT ONLY RAW JSON:\n"
+            "{\n"
+            '  "type": "end",\n'
+            '  "score": <1–10>,\n'
+            '  "recommendations": ["…","…"]\n'
+            "}\n"
+        )
+        msgs = [{"role":"system","content":eval_prompt}]
+        for m in history:
+            msgs.append({
+                "role": "user" if m.sender=='user' else "model",
+                "content": m.message
+            })
+        ai_out = generate_response(msgs)
+        result = json.loads(strip_json(ai_out))
+
+        if result.get("type")=="end":
+            eval_id   = str(uuid.uuid4())
+            timestamp = datetime.utcnow().isoformat()
+            rec = ChatEvaluation(
+                id               = eval_id,
+                session_id       = sid,
+                score            = result["score"],
+                recommendations  = json.dumps(result["recommendations"]),
+                evaluated_at     = timestamp
+            )
+            db.session.add(rec); db.session.commit()
+
+            return sid, None, True, {
+                "id":             eval_id,
+                "session_id":     sid,
+                "score":          result["score"],
+                "recommendations":result["recommendations"],
+                "evaluated_at":   timestamp
+            }
+
+    # 5) Ask next question
+    lvl     = HRLevel.query.get(session.hr_level_id)
+    first_q = (len(asked)==0)
+    sys_p   = build_system_prompt(lvl, session.job_type, asked, first_question_only=first_q)
+    msgs    = [{"role":"system","content":sys_p}]
+    for m in history:
+        msgs.append({
+            "role": "user" if m.sender=='user' else "model",
+            "content": m.message
+        })
+
+    ai_out   = generate_response(msgs)
+    question = json.loads(strip_json(ai_out))
+
+    # If Gemini itself ends here:
+    if question.get("type")=="end":
+        eval_id   = str(uuid.uuid4())
+        timestamp = datetime.utcnow().isoformat()
+        rec = ChatEvaluation(
+            id               = eval_id,
+            session_id       = sid,
+            score            = question["score"],
+            recommendations  = json.dumps(question["recommendations"]),
+            evaluated_at     = timestamp
+        )
+        db.session.add(rec); db.session.commit()
+        return sid, None, True, {
+            "id":             eval_id,
+            "session_id":     sid,
+            "score":          question["score"],
+            "recommendations":question["recommendations"],
+            "evaluated_at":   timestamp
+        }
+
+    # save the bot question
+    db.session.add(ChatMessage(
+        session_id=sid,
+        sender='bot',
+        message=json.dumps(question)
+    ))
+    db.session.commit()
+
+    return sid, question, False, None
+
+@app.route('/api/v1/feature/interview/voice', methods=['POST'])
+def chat_voice():
+    # 1) Extract session + init params or file
+    if request.is_json:
+        data  = request.get_json()
+        sid   = data.get('session_id')
+        uid   = data.get('user_id')
+        hrid  = data.get('hr_level_id')
+        job   = data.get('job_type')
+        audio = None
+    else:
+        sid   = request.form.get('session_id')
+        uid   = request.form.get('user_id')
+        hrid  = request.form.get('hr_level_id')
+        job   = request.form.get('job_type')
+        audio = request.files.get('file')
+
+    # ==== INITIAL CALL: no sid & no audio ====
+    if not sid and audio is None:
+        missing = [k for k,v in (('user_id',uid),('hr_level_id',hrid),('job_type',job)) if not v]
+        if missing:
+            return jsonify({"error":"Missing init fields","missing":missing}),400
+
+        # This returns (session_id, ai_q, is_end, eval_payload)
+        new_sid, _, _, eval_payload = handle_text_chat(None, "", {
+            'user_id': uid,
+            'hr_level_id': hrid,
+            'job_type': job
+        })
+
+        # Pull the question from eval_payload["response"]
+        question = eval_payload.get("response", {})
+        qtext     = question.get("question_text", "")
+
+        # Persist bot intro
+        db.session.add(ChatMessage(
+            session_id=new_sid, sender='bot', message=json.dumps(question)
+        ))
+        db.session.commit()
+
+        # TTS and respond
+        return jsonify({
+            "session_id":    new_sid,
+            "transcript":    "",
+            "response_text": qtext,
+            "response_audio": synthesize_to_mp3(qtext)
+        }), 200
+
+    # ==== FOLLOW-UP: must have sid & file ====
+    if not sid:
+        return jsonify({"error":"session_id is required"}),400
+    if audio is None:
+        return jsonify({"error":"Missing audio file"}),400
+
+    # 2) Transcribe user
+    transcript = transcribe_mp3_file(audio)
+    db.session.add(ChatMessage(
+        session_id=sid, sender='user', message=transcript
+    ))
+    db.session.commit()
+
+    # 3) Continue chat
+    new_sid, ai_q, is_end, eval_payload = handle_text_chat(sid, transcript, {})
+
+    # 4) If the session is NOT complete, force a question path
+    if not is_end:
+        # make sure we have a question payload (or synthesize a fallback)
+        question = ai_q or {}
+        if question.get("type") != "question":
+            # Something went wrong upstream: regenerate a fresh question
+            # by calling handle_text_chat again, or you can raise an error.
+            return jsonify({"error":"Expected another question, got none"}), 500
+
+        text      = question["question_text"]
+        audio_url = synthesize_to_mp3(text)
+
+        # persist bot question
+        db.session.add(ChatMessage(
+            session_id=new_sid,
+            sender='bot',
+            message=json.dumps(question)
+        ))
+        db.session.commit()
+
+        return jsonify({
+            "session_id":    new_sid,
+            "transcript":    transcript,
+            "response_text": text,
+            "response_audio":audio_url
+        }), 200
+
+    # 5) Only when is_end == True do we produce the final evaluation
+    evaluation = eval_payload   # {"score":..., "recommendations":[...]}
+
+    db.session.add(ChatMessage(
+        session_id=new_sid,
+        sender='bot',
+        message=json.dumps(evaluation)
+    ))
+    db.session.commit()
+
+    summary   = (
+        f"Skor Anda adalah {evaluation['score']}. "
+        f"Rekomendasi: {'; '.join(evaluation['recommendations'])}"
+    )
+    audio_url = synthesize_to_mp3(summary)
+
+    return jsonify({
+        "session_id":    new_sid,
+        "transcript":    transcript,
+        "evaluation":    evaluation,
+        "response_audio":audio_url
+    }), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
