@@ -1686,6 +1686,70 @@ For the "q" using full lowercase & use "_" as space
 }
 ```
 
+### Voice Interview
+
+---
+
+- Method: ```POST```
+
+- URL:
+```json
+{base}/api/v1/feature/interview/voice
+```
+
+- Request Body (Initialize Interview with AI):
+```json
+{
+    "user_id":"4c87d980-7457-4df1-ba12-c152b948b762",
+    "hr_level_id":1,
+    "job_type":"Software Engineer"
+}
+```
+
+- Response Body (After Initialize Interview with AI):
+```json
+{
+    "response_audio": "<link-to-audio-mp3>.mp3",
+    "response_text": "Perkenalkan diri Anda: nama, peran saat ini, dan berapa tahun pengalaman yang Anda miliki.", (Transcript Audio from AI)
+    "session_id": "c68a6304-e837-402b-b017-ee75380f7f31", (Session ID)
+    "transcript": "" (Transcript Audio from User)[NULL at Initialize]
+}
+```
+
+- Request Body (Continue Voice Interview with AI):
+
+
+
+- Response Body (After Initialize Interview with AI):
+```json
+{
+    "response_audio": "<link-to-audio-mp3>.mp3",
+    "response_text": "Terima kasih atas perkenalannya! Senang mendengar pengalaman Anda. Selanjutnya, apa yang membuat Anda tertarik pada posisi Software Engineer ini di perusahaan kami?", (Transcript Audio from AI)
+    "session_id": "c68a6304-e837-402b-b017-ee75380f7f31",
+    "transcript": "saya saya adalah seorang programmer dengan pengalaman 2 tahun dalam bidang software Engineer" (Transcript Audio from User)
+}
+```
+
+- Response Body (Evaluation):
+```json
+{
+    "evaluation": {
+        "evaluated_at": "2025-07-09T11:31:52.566051",
+        "id": "79faade1-37ce-4780-a2a9-72acae992bb1",
+        "recommendations": [
+            "Kandidat perlu meningkatkan kemampuan komunikasi lisan secara signifikan, terutama dalam menjelaskan konsep atau pengalaman yang kompleks secara koheren dan terstruktur.",
+            "Latih diri untuk merangkai kalimat dan gagasan agar tetap relevan dan mudah dipahami, khususnya saat menjawab pertanyaan detail tentang pengalaman proyek.",
+            "Perbaiki kemampuan untuk menyelesaikan penjelasan tanpa penyimpangan atau penggunaan kata-kata yang tidak relevan/tidak masuk akal."
+        ], (AI will Read the Recommendations)
+        "score": 3,
+        "session_id": "49fe87b7-4d7d-4d6a-b962-d7fa932c6fcc"
+    },
+    "response_audio": "<link-to-audio-mp3>.mp3", 
+    "session_id": "49fe87b7-4d7d-4d6a-b962-d7fa932c6fcc",
+    "transcript": "mengerjakan sistem manajemen inventaris real-time untuk ritel besar dengan ribuan tantangan skala data dengan sharding dan kasih 47 tekstur microservices download bangsa integrasi dengan api eksternal melalui lapisan adapter dan Retribusi serta melindungi data menggunakan" (Transcript Audio from User)
+}
+```
+
 ### Cloud Architecture
 
 <div align="center">
