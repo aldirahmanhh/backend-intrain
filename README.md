@@ -1718,9 +1718,13 @@ For the "q" using full lowercase & use "_" as space
 
 - Request Body (Continue Voice Interview with AI):
 
+<div align="center">
 
+![image](https://github.com/user-attachments/assets/3d138686-e1ea-4e77-89e6-3ec0bc3190f1)
 
-- Response Body (After Initialize Interview with AI):
+</div>
+
+- Response Body (Continue Interview with AI):
 ```json
 {
     "response_audio": "<link-to-audio-mp3>.mp3",
