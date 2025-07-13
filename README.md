@@ -1758,15 +1758,16 @@ For the "q" using full lowercase & use "_" as space
 
 <div align="center">
   
-![GCP-inTrain ai Architecture](https://github.com/user-attachments/assets/e59a98a6-a10a-4050-8c8c-700433b049b1)
+![Hybrid Cloud inTrain.ai Architecture](https://github.com/user-attachments/assets/74a7c41a-892d-4019-8d10-a5b9837a302e)
 
 </div>
 
+
 ### Deployment
 
-- **Environment**: [Google Cloud Platform](https://cloud.google.com)
+- **Environment**: [Google Cloud Platform](https://cloud.google.com) | [Azure](https://portal.azure.com)
 - **Server Deployments**: Cloud Run
-- **Database Services**: Cloud SQL
+- **Database Services**: Azure MySQL Database
 - **Storage**: Cloud Storage
 
 ---
